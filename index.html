@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SSV Nexus · 评论模块原型 v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:        #FAFAF8;
+    --paper-warm:   #F5F3EE;
+    --paper-soft:   #F0EEE8;
+    --ink:          #1A1918;
+    --ink-2:        #3C3A37;
+    --ink-3:        #7A7874;
+    --ink-4:        #A8A6A2;
+    --ink-5:        #CFCCC6;
+    --rule:         #EBE8E2;
+    --rule-soft:    #F2F0EA;
+    --accent:       #1F1D1B;
+    --accent-soft:  #EDEAE3;
+    --danger:       #9E3C36;
+    --danger-soft:  #F8EDEB;
+    --like:         #C74A3E;
+
+    --r-sm: 4px;
+    --r:    8px;
+    --r-lg: 12px;
+
+    --font-zh: "Noto Sans SC", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-en: "DM Sans", "Noto Sans SC", sans-serif;
+    --font-serif: "Noto Serif SC", Georgia, serif;
+    --font-mono: "JetBrains Mono", SFMono-Regular, Consolas, monospace;
+
+    --ease: cubic-bezier(.3,.7,.4,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-en), var(--font-zh);
+    font-size: 14px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "kern", "palt";
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input, textarea { font-family: inherit; outline: none; }
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  /* ==================== top nav ==================== */
+  .top-nav {
+    padding: 20px 48px;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .brand {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .brand .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--ink);
+    margin-right: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-family: var(--font-zh);
+    font-size: 11.5px;
+    color: var(--ink-4);
+    letter-spacing: 0.02em;
+    padding-left: 12px;
+    border-left: 1px solid var(--rule);
+  }
+
+  /* ==================== page ==================== */
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 32px 140px;
+  }
+
+  .event-head {
+    margin-bottom: 40px;
+  }
+  .crumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11.5px;
+    color: var(--ink-4);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: var(--font-en);
+    margin-bottom: 14px;
+  }
+  .crumb .sep { color: var(--ink-5); }
+  .crumb .num {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+  .event-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .event-meta {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--ink-4);
+  }
+  .event-meta .dot { margin: 0 8px; color: var(--ink-5); }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 36px 0 28px;
+  }
+
+  /* ==================== comments header ==================== */
+  .comments-header {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .comments-label {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .comments-count {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-4);
+  }
+  .visibility-note {
+    font-size: 11.5px;
+    color: var(--ink-4);
+    letter-spacing: 0.01em;
+    margin-bottom: 26px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .visibility-note::before {
+    content: "";
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--ink-5);
+  }
+
+  /* ==================== comments list ==================== */
+  .comments-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .comments-list > .comment + .comment {
+    border-top: 1px solid var(--rule-soft);
+    margin-top: 24px;
+    padding-top: 24px;
+  }
+
+  /* ==================== comment ==================== */
+  .comment {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    position: relative;
+  }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-zh);
+    font-weight: 500;
+    font-size: 12.5px;
+    letter-spacing: 0;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .avatar.suri      { background: #E3DCCE; color: #5C4E36; }
+  .avatar.liufang   { background: #DEDAD2; color: #4F4C45; }
+  .avatar.zhaoyu    { background: #E8D8D3; color: #6C4A43; }
+  .avatar.sunjian   { background: #D9E0D6; color: #4C5B4C; }
+  .avatar.zhangming { background: #DAD9E0; color: #4E4C66; }
+  .avatar.wangqiang { background: #E6DBCE; color: #6F5D42; }
+
+  .comment-body { min-width: 0; padding-top: 2px; }
+
+  .comment-meta {
+    display: flex; align-items: baseline; flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .comment-author {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--ink);
+    letter-spacing: -0.003em;
+  }
+  .comment-dept {
+    font-size: 12px;
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+  .comment-time {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: var(--ink-4);
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
+  .edited-tag {
+    font-size: 11px;
+    color: var(--ink-4);
+    font-style: normal;
+    letter-spacing: 0.02em;
+    cursor: help;
+  }
+  .edited-tag::before { content: "· "; color: var(--ink-5); }
+
+  .comment-content {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--ink-2);
+    word-break: break-word;
+    white-space: pre-wrap;
+    letter-spacing: 0.003em;
+  }
+  .comment-content .mention {
+    color: var(--ink);
+    font-weight: 500;
+    border-bottom: 1px dotted var(--ink-4);
+    padding-bottom: 1px;
+  }
+
+  .comment-image {
+    margin-top: 12px;
+    max-width: 280px;
+    max-height: 200px;
+    border-radius: var(--r);
+    border: 1px solid var(--rule);
+    cursor: zoom-in;
+    display: block;
+    transition: opacity .2s var(--ease);
+  }
+  .comment-image:hover { opacity: 0.9; }
+
+  .comment-deleted {
+    color: var(--ink-4);
+    font-style: italic;
+    font-size: 13px;
+    padding: 2px 0;
+    letter-spacing: 0.01em;
+  }
+
+  /* likes summary — inline, minimal */
+  .likes-summary {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.01em;
+  }
+  .likes-summary .mark {
+    color: var(--like);
+    font-size: 10px;
+    line-height: 1;
+    transform: translateY(-1px);
+  }
+
+  /* action row — minimal text links with explicit separator
+     关键修复：不再用 ::before 兄弟选择器，改用显式 .act-sep，
+     避免 own-actions 包裹后分隔符缺失导致「回复」「编辑」粘连 */
+  .comment-actions {
+    margin-top: 12px;
+    display: flex; align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .reply-actions {
+    margin-top: 6px;
+    display: flex; align-items: center;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+  }
+  .act-btn {
+    padding: 3px 0;
+    color: var(--ink-3);
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    transition: color .15s var(--ease);
+    font-family: var(--font-zh);
+  }
+  .reply-actions .act-btn { font-size: 11.5px; }
+  .act-sep {
+    display: inline-block;
+    margin: 0 10px;
+    color: var(--ink-5);
+    font-size: 12px;
+    user-select: none;
+  }
+  .act-btn:hover { color: var(--ink); }
+  .act-btn.active { color: var(--ink); font-weight: 500; }
+  .act-btn.danger:hover { color: var(--danger); }
+  .act-btn .cnt {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    margin-left: 3px;
+    color: var(--ink-4);
+  }
+  .act-btn.active .cnt { color: var(--ink-3); }
+
+  /* own actions — hover reveal */
+  .own-actions {
+    display: inline-flex; align-items: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s var(--ease);
+  }
+  .comment:hover .own-actions,
+  .reply-item:hover .own-actions { opacity: 1; pointer-events: auto; }
+
+  /* ==================== reply zone (nested, subtle) ==================== */
+  .reply-zone {
+    margin-top: 18px;
+    padding-left: 18px;
+    border-left: 1px solid var(--rule);
+    display: none;
+  }
+  .reply-zone.has-content { display: block; }
+  .reply-item {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    padding: 10px 0;
+    position: relative;
+  }
+  .reply-item + .reply-item { border-top: 1px solid var(--rule-soft); }
+  .reply-item .avatar { width: 24px; height: 24px; font-size: 11px; }
+  .reply-item .reply-body { min-width: 0; padding-top: 1px; }
+
+  .reply-meta {
+    display: flex; align-items: baseline; flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 12.5px;
+  }
+  .reply-meta .comment-author { font-size: 12.5px; }
+  .reply-meta .comment-dept { font-size: 11.5px; }
+  .reply-meta .comment-time { margin-left: auto; font-size: 11px; }
+  .reply-to { color: var(--ink-4); font-size: 11.5px; font-style: normal; }
+  .reply-to .mention {
+    color: var(--ink-2); font-weight: 500;
+    border-bottom: 1px dotted var(--ink-4);
+    padding-bottom: 0px;
+  }
+  .reply-content {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    word-break: break-word; white-space: pre-wrap;
+  }
+  .reply-content .mention {
+    color: var(--ink); font-weight: 500;
+    border-bottom: 1px dotted var(--ink-4);
+    padding-bottom: 1px;
+  }
+  .reply-image {
+    margin-top: 8px; max-width: 220px; max-height: 160px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--rule);
+    display: block;
+  }
+  .reply-likes { margin-top: 6px; font-size: 11.5px; }
+
+  .expand-replies {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 2px 0;
+    color: var(--ink-3);
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    font-family: var(--font-zh);
+    transition: color .15s var(--ease);
+  }
+  .expand-replies:hover { color: var(--ink); }
+  .expand-replies::before { content: "—— "; color: var(--ink-5); }
+
+  /* ==================== composer ==================== */
+  .composer {
+    margin-top: 44px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+  }
+  .composer-inline {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    cursor: text;
+    color: var(--ink-3);
+    font-size: 13px;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color .2s var(--ease);
+    letter-spacing: 0.01em;
+  }
+  .composer-inline:hover { border-color: var(--ink-4); }
+  .composer-inline .pen {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ink-5);
+    flex-shrink: 0;
+  }
+
+  .composer-expanded {
+    padding: 2px 0 0;
+    display: none;
+    position: relative;
+  }
+  .composer-expanded.active { display: block; }
+  .composer-expanded.dragover {
+    outline: 1px dashed var(--ink-4);
+    outline-offset: 8px;
+    border-radius: var(--r);
+  }
+
+  .composer-textarea {
+    width: 100%;
+    min-height: 90px;
+    max-height: 260px;
+    border: none;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    background: transparent;
+    padding: 0;
+  }
+  .composer-textarea::placeholder { color: var(--ink-4); }
+
+  .composer-image-preview {
+    margin-top: 12px;
+    display: none;
+    position: relative;
+    width: fit-content;
+  }
+  .composer-image-preview.has-img { display: block; }
+  .composer-image-preview img {
+    max-width: 240px; max-height: 180px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--rule);
+    display: block;
+  }
+  .composer-image-preview .remove-img {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid; place-items: center;
+    font-size: 11px; line-height: 1;
+    opacity: 0.85;
+  }
+  .composer-image-preview .remove-img:hover { opacity: 1; }
+
+  .composer-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+  }
+  .composer-tools {
+    display: flex; align-items: center; gap: 2px;
+  }
+  .tool-btn {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    border-radius: var(--r-sm);
+    color: var(--ink-3);
+    transition: background .15s var(--ease), color .15s var(--ease);
+    font-family: var(--font-en);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .tool-btn:hover { background: var(--paper-warm); color: var(--ink); }
+  .tool-btn svg { width: 14px; height: 14px; }
+  .tool-btn.at { font-size: 15px; font-weight: 500; line-height: 1; }
+
+  .composer-right {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .char-counter {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    letter-spacing: 0.02em;
+  }
+  .char-counter.over { color: var(--danger); font-weight: 500; }
+
+  .btn-primary {
+    padding: 6px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--r-sm);
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: opacity .15s var(--ease), transform .1s var(--ease);
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .btn-ghost {
+    padding: 6px 10px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    border-radius: var(--r-sm);
+    letter-spacing: 0.02em;
+    transition: color .15s var(--ease);
+  }
+  .btn-ghost:hover { color: var(--ink); }
+
+  /* reply composer (inline, minimal) */
+  .inline-reply-composer {
+    margin-top: 14px;
+    display: none;
+    padding: 12px 14px;
+    background: var(--paper-warm);
+    border-radius: var(--r);
+  }
+  .inline-reply-composer.active { display: block; }
+  .inline-reply-composer textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    min-height: 50px;
+    font-size: 13px;
+    line-height: 1.65;
+    background: transparent;
+    color: var(--ink);
+  }
+  .inline-reply-composer textarea::placeholder { color: var(--ink-4); }
+  .inline-reply-composer .composer-footer {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* inline edit */
+  .inline-edit {
+    display: none;
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: var(--paper-warm);
+    border-radius: var(--r);
+  }
+  .inline-edit.active { display: block; }
+  .inline-edit textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    min-height: 54px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    background: transparent;
+    color: var(--ink);
+  }
+  .inline-edit .composer-footer {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ==================== mention popup ==================== */
+  #mention-popup {
+    position: absolute;
+    z-index: 100;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: 0 12px 32px rgba(20,19,18,0.08), 0 2px 6px rgba(20,19,18,0.04);
+    padding: 4px;
+    min-width: 220px;
+    max-height: 260px;
+    overflow-y: auto;
+    display: none;
+  }
+  #mention-popup.active { display: block; }
+  .mention-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background .1s var(--ease);
+  }
+  .mention-item:hover, .mention-item.focus { background: var(--paper-warm); }
+  .mention-item .avatar { width: 22px; height: 22px; font-size: 10.5px; }
+  .mention-name { font-size: 12.5px; font-weight: 500; }
+  .mention-dept { color: var(--ink-4); font-size: 11px; }
+  .mention-empty {
+    padding: 14px 12px;
+    font-size: 12px;
+    color: var(--ink-4);
+    text-align: center;
+  }
+
+  /* ==================== toast ==================== */
+  #toast-container {
+    position: fixed;
+    top: 24px; right: 24px;
+    z-index: 200;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    padding: 10px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--r);
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 8px 24px rgba(20,19,18,0.15);
+    opacity: 0; transform: translateY(-8px);
+    transition: opacity .2s var(--ease), transform .2s var(--ease);
+    max-width: 320px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast::before {
+    content: "";
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--paper);
+    margin-right: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+
+  /* ==================== confirm dialog ==================== */
+  .confirm-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20,19,18,0.32);
+    backdrop-filter: blur(2px);
+    display: none;
+    place-items: center;
+    z-index: 300;
+  }
+  .confirm-backdrop.active { display: grid; }
+  .confirm-box {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    padding: 28px 32px 22px;
+    min-width: 340px;
+    max-width: 420px;
+    box-shadow: 0 24px 48px rgba(20,19,18,0.14);
+  }
+  .confirm-box h3 {
+    font-family: var(--font-serif);
+    font-size: 16px; font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.003em;
+  }
+  .confirm-box p {
+    color: var(--ink-3);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .confirm-actions {
+    display: flex; justify-content: flex-end; gap: 4px;
+    margin-top: 20px;
+  }
+  .btn-danger {
+    padding: 6px 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--r-sm);
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    transition: opacity .15s var(--ease);
+  }
+  .btn-danger:hover { opacity: 0.88; }
+
+  /* subtle paper */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 50% 10%, rgba(170,150,120,0.02) 0%, transparent 40%),
+      radial-gradient(circle at 20% 90%, rgba(120,100,80,0.015) 0%, transparent 50%);
+    z-index: 0;
+  }
+  .top-nav, .page, #toast-container, .confirm-backdrop { position: relative; z-index: 1; }
+  #mention-popup { z-index: 100; /* absolute 已在上方规则中设定 */ }
+
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="brand"><span class="dot"></span>SSV Nexus</div>
+  <div class="brand-sub">透明即上下文，上下文即生产力</div>
+</div>
+
+<div class="page">
+
+  <div class="event-head">
+    <div class="crumb">
+      <span>景德镇陶瓷文化数字化项目</span>
+      <span class="sep">／</span>
+      <span class="num">#1</span>
+    </div>
+    <h1 class="event-title">技术方案初评 · 知识图谱与数字藏品的复用路径</h1>
+    <div class="event-meta">
+      维护人 Suri、刘芳<span class="dot">·</span>5 位参与者<span class="dot">·</span>上次更新 04-17 14:22
+    </div>
+  </div>
+
+  <hr class="rule" />
+
+  <div class="comments-header">
+    <div class="comments-label">评论</div>
+    <span class="comments-count" id="total-count">0</span>
+  </div>
+  <div class="visibility-note">可见性继承自本 Event — 能看到该 Event 的成员即可查看与发布评论</div>
+
+  <div class="comments-list" id="comments-list"></div>
+
+  <div class="composer">
+    <div class="composer-inline" id="composer-inline">
+      <span class="pen"></span>
+      <span>留一条评论，好的建议可能被采纳</span>
+    </div>
+    <div class="composer-expanded" id="composer-expanded">
+      <textarea class="composer-textarea" id="composer-text" placeholder="留一条评论，好的建议可能被采纳" maxlength="500"></textarea>
+      <div class="composer-image-preview" id="composer-image-preview">
+        <img id="composer-image" alt="附图" />
+        <button class="remove-img" onclick="removeComposerImage()">✕</button>
+      </div>
+      <div class="composer-footer">
+        <div class="composer-tools">
+          <button class="tool-btn at" title="@ 某人" onmousedown="event.preventDefault()" onclick="insertAtSymbol()">@</button>
+          <button class="tool-btn" title="上传图片（拖拽 / 粘贴亦可）" onmousedown="event.preventDefault()" onclick="pickImage()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+              <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
+              <circle cx="5.5" cy="6" r="1"/>
+              <path d="M1.5 11 L5 8 L8 11 L11 7.5 L14.5 11.5"/>
+            </svg>
+          </button>
+          <input type="file" id="file-input" accept="image/*" style="display:none" />
+        </div>
+        <div class="composer-right">
+          <span class="char-counter" id="char-counter">0 / 500</span>
+          <button class="btn-ghost" onclick="closeComposer()">取消</button>
+          <button class="btn-primary" id="btn-send" onclick="submitComment()">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="mention-popup"></div>
+<div id="toast-container"></div>
+
+<div class="confirm-backdrop" id="confirm-backdrop">
+  <div class="confirm-box">
+    <h3 id="confirm-title">确认删除？</h3>
+    <p id="confirm-msg">删除后会显示"此评论已删除 · 作者自删"的占位，不可恢复。</p>
+    <div class="confirm-actions">
+      <button class="btn-ghost" onclick="closeConfirm()">取消</button>
+      <button class="btn-danger" id="confirm-ok">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+ *  Data
+ * ============================================================ */
+const currentUser = { id: "u_suri", name: "Suri", dept: "产品设计组", avatarClass: "suri", initial: "S" };
+
+const users = [
+  { id: "u_suri", name: "Suri", dept: "产品设计组", avatarClass: "suri", initial: "S" },
+  { id: "u_liufang", name: "刘芳", dept: "技术架构部", avatarClass: "liufang", initial: "刘" },
+  { id: "u_zhaoyu", name: "赵宇", dept: "法务合规部", avatarClass: "zhaoyu", initial: "赵" },
+  { id: "u_sunjian", name: "孙健", dept: "资深产品经理", avatarClass: "sunjian", initial: "孙" },
+  { id: "u_zhangming", name: "张明", dept: "技术架构部", avatarClass: "zhangming", initial: "张" },
+  { id: "u_wangqiang", name: "王强", dept: "前端组", avatarClass: "wangqiang", initial: "王" }
+];
+function userById(id) { return users.find(u => u.id === id); }
+
+let comments = [
+  {
+    id: "c1", authorId: "u_liufang",
+    content: "可以提供敦煌项目的技术经验复用，尤其是 OCR 和知识抽取那块儿，我们踩过的坑比较系统。",
+    time: "04-17 09:45", editedAt: null, image: null,
+    likes: ["u_zhangming"],
+    replies: [
+      { id: "c1-r1", authorId: "u_suri", replyTo: "u_liufang",
+        content: "麻烦整理一份技术复用清单，周五前给我。",
+        time: "04-17 10:00", editedAt: null, image: null, likes: [] }
+    ]
+  },
+  {
+    id: "c2", authorId: "u_zhaoyu",
+    content: "知识图谱方面建议先对接景德镇博物馆已有的数字藏品库，避免重复建设。合同范本我这边有历史项目可参考。",
+    time: "04-17 10:15", editedAt: null, image: null,
+    likes: ["u_zhangming", "u_sunjian"],
+    replies: [
+      { id: "c2-r1", authorId: "u_suri", replyTo: "u_zhaoyu",
+        content: "好，我这边联系博物馆 IT 组。",
+        time: "04-17 16:10", editedAt: "04-17 16:52", image: null, likes: ["u_zhaoyu"] },
+      { id: "c2-r2", authorId: "u_sunjian", replyTo: "u_zhaoyu",
+        content: "+1 博物馆的藏品结构我之前调研过，可以一起拉个会。",
+        time: "04-17 17:10", editedAt: null, image: null, likes: [] },
+      { id: "c2-r3", authorId: "u_zhangming", replyTo: "u_zhaoyu",
+        content: "数字藏品库的 API 文档我有，同步到群里了。",
+        time: "04-17 17:40", editedAt: null, image: null, likes: [] }
+    ]
+  },
+  {
+    id: "c3", authorId: "u_sunjian",
+    content: "附上上次敦煌项目末期的技术复盘封面，供参考 ↓",
+    time: "04-17 18:05", editedAt: null,
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800",
+    likes: [], replies: []
+  },
+  {
+    id: "c4", authorId: "u_suri",
+    content: "刚和赵宇对完了，博物馆那边周三下午有空接待。@张明 你周三能不能一起去一趟？",
+    time: "04-17 18:30", editedAt: null, image: null,
+    likes: [], replies: []
+  }
+];
+
+let composerImage = null;
+let replyImageMap = {};
+let editImageMap = {};
+let expandedReplies = new Set();
+let confirmAction = null;
+
+/* ============================================================
+ *  Render
+ * ============================================================ */
+function totalCount() {
+  return comments.reduce((sum, c) => sum + 1 + c.replies.length, 0);
+}
+
+function likesText(likeIds) {
+  if (likeIds.length === 0) return "";
+  if (likeIds.length === 1) return `${userById(likeIds[0]).name} 表示赞同`;
+  const names = likeIds.slice(0, 3).map(id => userById(id).name);
+  if (likeIds.length <= 3) return `${names.join("、")} 表示赞同`;
+  return `${names.join("、")} 等 ${likeIds.length} 人表示赞同`;
+}
+
+function renderContent(text) {
+  const esc = text.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+  return esc.replace(/@([^\s@]+?)(?=[\s，。！？,.!?]|$)/g, (m, name) => {
+    const u = users.find(u => u.name === name);
+    return u ? `<span class="mention">@${name}</span>` : m;
+  });
+}
+
+function editedTag(editedAt) {
+  if (!editedAt) return "";
+  return `<span class="edited-tag" title="最后编辑于 ${editedAt}">已编辑</span>`;
+}
+
+function renderSubReplies(c) {
+  const all = c.replies;
+  if (all.length === 0) return "";
+  const expanded = expandedReplies.has(c.id);
+  const show = expanded ? all : all.slice(0, 2);
+  const hiddenCount = all.length - show.length;
+  const items = show.map(r => renderSubReplyItem(r, c.id)).join("");
+  const expandBtn = hiddenCount > 0
+    ? `<button class="expand-replies" onclick="expandReplies('${c.id}')">展开全部 ${all.length} 条回复</button>`
+    : expanded && all.length > 2
+      ? `<button class="expand-replies" onclick="collapseReplies('${c.id}')">收起</button>`
+      : "";
+  return `<div class="reply-zone has-content">${items}${expandBtn}</div>`;
+}
+
+function renderSubReplyItem(r, parentId) {
+  const u = userById(r.authorId);
+  const replyToUser = userById(r.replyTo);
+  const isOwn = r.authorId === currentUser.id;
+  const liked = r.likes.includes(currentUser.id);
+
+  if (r.deleted) {
+    return `
+      <div class="reply-item" id="reply-${r.id}">
+        <div class="avatar ${u.avatarClass}">${u.initial}</div>
+        <div class="reply-body">
+          <div class="reply-meta">
+            <span class="comment-author">${u.name}</span>
+            <span class="comment-dept">· ${u.dept}</span>
+            <span class="comment-time">${r.time}</span>
+          </div>
+          <div class="comment-deleted">此评论已删除 · 作者自删</div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* 子评论不再有"回复"按钮，硬拦三级 */
+  const actions = [];
+  actions.push(`<button class="act-btn ${liked ? "active" : ""}" onclick="toggleReplyLike('${parentId}','${r.id}')">${liked ? "已赞同" : "赞同"}${r.likes.length > 0 ? `<span class="cnt">${r.likes.length}</span>` : ""}</button>`);
+  if (isOwn) {
+    actions.push(`<span class="own-actions">
+      <span class="act-sep">·</span>
+      <button class="act-btn" onclick="startEditReply('${parentId}','${r.id}')">编辑</button>
+      <span class="act-sep">·</span>
+      <button class="act-btn danger" onclick="confirmDeleteReply('${parentId}','${r.id}')">删除</button>
+    </span>`);
+  }
+
+  return `
+    <div class="reply-item" id="reply-${r.id}">
+      <div class="avatar ${u.avatarClass}">${u.initial}</div>
+      <div class="reply-body">
+        <div class="reply-meta">
+          <span class="comment-author">${u.name}</span>
+          <span class="comment-dept">· ${u.dept}</span>
+          <span class="reply-to">回复 <span class="mention">@${replyToUser.name}</span></span>
+          <span class="comment-time">${r.time}</span>
+          ${editedTag(r.editedAt)}
+        </div>
+        <div class="reply-content">${renderContent(r.content)}</div>
+        ${r.image ? `<img class="reply-image" src="${r.image}" onclick="window.open('${r.image}','_blank')" />` : ""}
+        ${r.likes.length > 0 ? `<div class="likes-summary reply-likes"><span class="mark">●</span>${likesText(r.likes)}</div>` : ""}
+        <div class="reply-actions">${actions.join("")}</div>
+        <div id="edit-inline-${r.id}" class="inline-edit"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderComment(c) {
+  const u = userById(c.authorId);
+  const isOwn = c.authorId === currentUser.id;
+  const liked = c.likes.includes(currentUser.id);
+
+  if (c.deleted) {
+    return `
+      <div class="comment" id="comment-${c.id}">
+        <div class="avatar ${u.avatarClass}">${u.initial}</div>
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-author">${u.name}</span>
+            <span class="comment-dept">· ${u.dept}</span>
+            <span class="comment-time">${c.time}</span>
+          </div>
+          <div class="comment-deleted">此评论已删除 · 作者自删</div>
+          ${renderSubReplies(c)}
+        </div>
+      </div>
+    `;
+  }
+
+  /* 显式分隔符，避免 own-actions 包裹导致粘连 */
+  const actions = [];
+  actions.push(`<button class="act-btn ${liked ? "active" : ""}" onclick="toggleLike('${c.id}')">${liked ? "已赞同" : "赞同"}${c.likes.length > 0 ? `<span class="cnt">${c.likes.length}</span>` : ""}</button>`);
+  actions.push(`<span class="act-sep">·</span>`);
+  actions.push(`<button class="act-btn" onclick="openReply('${c.id}')">回复</button>`);
+  if (isOwn) {
+    actions.push(`<span class="own-actions">
+      <span class="act-sep">·</span>
+      <button class="act-btn" onclick="startEditMain('${c.id}')">编辑</button>
+      <span class="act-sep">·</span>
+      <button class="act-btn danger" onclick="confirmDeleteMain('${c.id}')">删除</button>
+    </span>`);
+  }
+
+  return `
+    <div class="comment" id="comment-${c.id}">
+      <div class="avatar ${u.avatarClass}">${u.initial}</div>
+      <div class="comment-body">
+        <div class="comment-meta">
+          <span class="comment-author">${u.name}</span>
+          <span class="comment-dept">· ${u.dept}</span>
+          <span class="comment-time">${c.time}</span>
+          ${editedTag(c.editedAt)}
+        </div>
+        <div class="comment-content">${renderContent(c.content)}</div>
+        ${c.image ? `<img class="comment-image" src="${c.image}" onclick="window.open('${c.image}','_blank')" />` : ""}
+        ${c.likes.length > 0 ? `<div class="likes-summary"><span class="mark">●</span>${likesText(c.likes)}</div>` : ""}
+        <div class="comment-actions">${actions.join("")}</div>
+        <div id="edit-inline-${c.id}" class="inline-edit"></div>
+        <div id="reply-composer-${c.id}" class="inline-reply-composer"></div>
+        ${renderSubReplies(c)}
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  document.getElementById("comments-list").innerHTML =
+    comments.map(renderComment).join("");
+  document.getElementById("total-count").textContent = totalCount();
+}
+
+/* ============================================================
+ *  Composer (main)
+ * ============================================================ */
+const inline = document.getElementById("composer-inline");
+const expanded = document.getElementById("composer-expanded");
+const textarea = document.getElementById("composer-text");
+const counter = document.getElementById("char-counter");
+
+inline.addEventListener("click", openComposer);
+
+function openComposer() {
+  inline.style.display = "none";
+  expanded.classList.add("active");
+  setTimeout(() => textarea.focus(), 30);
+}
+
+function closeComposer() {
+  expanded.classList.remove("active");
+  inline.style.display = "flex";
+  textarea.value = "";
+  removeComposerImage();
+  updateCounter();
+  hideMentionPopup();
+}
+
+textarea.addEventListener("input", () => {
+  updateCounter();
+  maybeShowMentionPopup(textarea);
+});
+textarea.addEventListener("keyup", e => {
+  /* 光标键移动时也要重新判断 @ 触发位置 */
+  if (["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) maybeShowMentionPopup(textarea);
+});
+textarea.addEventListener("keydown", mentionKeydown);
+
+function updateCounter() {
+  const len = textarea.value.length;
+  counter.textContent = `${len} / 500`;
+  counter.classList.toggle("over", len > 500);
+  document.getElementById("btn-send").disabled =
+    (len === 0 && !composerImage) || len > 500;
+}
+
+function pickImage() { document.getElementById("file-input").click(); }
+document.getElementById("file-input").addEventListener("change", e => {
+  handleFile(e.target.files[0], "composer");
+  e.target.value = "";
+});
+
+function handleFile(file, target) {
+  if (!file) return;
+  if (!file.type.startsWith("image/")) { showToast("只支持图片"); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast("图片超过 5MB"); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (target === "composer") {
+      composerImage = e.target.result;
+      document.getElementById("composer-image").src = composerImage;
+      document.getElementById("composer-image-preview").classList.add("has-img");
+      updateCounter();
+    } else if (target.startsWith("reply:")) {
+      const cid = target.slice(6);
+      replyImageMap[cid] = e.target.result;
+      const prev = document.getElementById(`reply-img-preview-${cid}`);
+      if (prev) { prev.classList.add("has-img"); prev.querySelector("img").src = e.target.result; }
+    } else if (target.startsWith("edit:")) {
+      const cid = target.slice(5);
+      editImageMap[cid] = e.target.result;
+      const prev = document.getElementById(`edit-img-preview-${cid}`);
+      if (prev) { prev.classList.add("has-img"); prev.querySelector("img").src = e.target.result; }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeComposerImage() {
+  composerImage = null;
+  document.getElementById("composer-image-preview").classList.remove("has-img");
+  document.getElementById("composer-image").src = "";
+  updateCounter();
+}
+
+expanded.addEventListener("dragover", e => { e.preventDefault(); expanded.classList.add("dragover"); });
+expanded.addEventListener("dragleave", () => expanded.classList.remove("dragover"));
+expanded.addEventListener("drop", e => {
+  e.preventDefault();
+  expanded.classList.remove("dragover");
+  handleFile(e.dataTransfer.files[0], "composer");
+});
+textarea.addEventListener("paste", e => {
+  for (const it of e.clipboardData.items) {
+    if (it.type.startsWith("image/")) {
+      handleFile(it.getAsFile(), "composer");
+      e.preventDefault(); return;
+    }
+  }
+});
+
+function submitComment() {
+  const content = textarea.value.trim();
+  if (!content && !composerImage) return;
+  if (content.length > 500) { showToast("超过 500 字"); return; }
+  const c = {
+    id: "c" + Date.now(),
+    authorId: currentUser.id, content, time: nowStr(),
+    editedAt: null, image: composerImage, likes: [], replies: []
+  };
+  comments.push(c);
+  const mentioned = extractMentions(content);
+  closeComposer();
+  render();
+  if (mentioned.length) showToast(`已通知 ${mentioned.map(u => "@" + u.name).join("、")}`);
+}
+
+function extractMentions(text) {
+  const found = new Set();
+  const re = /@([^\s@]+?)(?=[\s，。！？,.!?]|$)/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const u = users.find(u => u.name === m[1]);
+    if (u && u.id !== currentUser.id) found.add(u);
+  }
+  return [...found];
+}
+
+function nowStr() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function insertAtSymbol() {
+  textarea.focus();
+  const pos = textarea.selectionStart;
+  textarea.value = textarea.value.slice(0, pos) + "@" + textarea.value.slice(pos);
+  textarea.selectionStart = textarea.selectionEnd = pos + 1;
+  updateCounter();
+  maybeShowMentionPopup(textarea);
+}
+
+/* ============================================================
+ *  Mention popup
+ * ============================================================ */
+const popup = document.getElementById("mention-popup");
+let mentionCtx = null;
+let mentionFocus = 0;
+
+function maybeShowMentionPopup(input) {
+  const text = input.value;
+  const pos = input.selectionStart;
+  const before = text.slice(0, pos);
+  const m = before.match(/@([^\s@]*)$/);
+  if (!m) { hideMentionPopup(); return; }
+  const atPos = before.length - m[0].length;
+  const filter = m[1];
+  mentionCtx = { input, atPos, filter };
+  showMentionPopup(input, filter);
+}
+
+function showMentionPopup(input, filter) {
+  const list = users.filter(u => u.id !== currentUser.id && u.name.includes(filter));
+  if (list.length === 0) {
+    popup.innerHTML = `<div class="mention-empty">未找到匹配成员</div>`;
+    popup.dataset.list = "[]";
+    positionPopup(input);
+    popup.classList.add("active");
+    return;
+  }
+  mentionFocus = 0;
+  popup.innerHTML = list.map((u, i) => `
+    <div class="mention-item ${i === 0 ? "focus" : ""}" data-idx="${i}" onmousedown="event.preventDefault(); pickMention(${i})">
+      <div class="avatar ${u.avatarClass}">${u.initial}</div>
+      <div>
+        <div class="mention-name">${u.name}</div>
+        <div class="mention-dept">${u.dept}</div>
+      </div>
+    </div>
+  `).join("");
+  popup.dataset.list = JSON.stringify(list.map(u => u.id));
+  positionPopup(input);
+  popup.classList.add("active");
+}
+
+function positionPopup(input) {
+  const rect = input.getBoundingClientRect();
+  popup.style.left = (rect.left + window.scrollX) + "px";
+  popup.style.top = (rect.bottom + window.scrollY + 6) + "px";
+}
+
+function hideMentionPopup() {
+  popup.classList.remove("active");
+  mentionCtx = null;
+}
+
+function pickMention(idx) {
+  if (!mentionCtx) return;
+  const list = JSON.parse(popup.dataset.list);
+  if (!list || list.length === 0) return;
+  const uid = list[idx];
+  const u = userById(uid);
+  const { input, atPos } = mentionCtx;
+  const before = input.value.slice(0, atPos);
+  const after = input.value.slice(input.selectionStart);
+  input.value = before + "@" + u.name + " " + after;
+  const newPos = (before + "@" + u.name + " ").length;
+  input.selectionStart = input.selectionEnd = newPos;
+  input.focus();
+  hideMentionPopup();
+  if (input === textarea) updateCounter();
+  /* trigger input event for reply/edit counters */
+  input.dispatchEvent(new Event("input"));
+}
+
+function mentionKeydown(e) {
+  if (!popup.classList.contains("active")) return;
+  const list = JSON.parse(popup.dataset.list || "[]");
+  if (list.length === 0) {
+    if (e.key === "Escape") hideMentionPopup();
+    return;
+  }
+  if (e.key === "ArrowDown") { e.preventDefault(); mentionFocus = (mentionFocus + 1) % list.length; updateMentionFocus(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); mentionFocus = (mentionFocus - 1 + list.length) % list.length; updateMentionFocus(); }
+  else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickMention(mentionFocus); }
+  else if (e.key === "Escape") hideMentionPopup();
+}
+function updateMentionFocus() {
+  popup.querySelectorAll(".mention-item").forEach((el, i) =>
+    el.classList.toggle("focus", i === mentionFocus));
+}
+
+/* ============================================================
+ *  Likes
+ * ============================================================ */
+function toggleLike(cid) {
+  const c = comments.find(x => x.id === cid);
+  if (!c) return;
+  const i = c.likes.indexOf(currentUser.id);
+  if (i >= 0) c.likes.splice(i, 1);
+  else c.likes.push(currentUser.id);
+  render();
+}
+function toggleReplyLike(pid, rid) {
+  const p = comments.find(x => x.id === pid);
+  const r = p && p.replies.find(x => x.id === rid);
+  if (!r) return;
+  const i = r.likes.indexOf(currentUser.id);
+  if (i >= 0) r.likes.splice(i, 1);
+  else r.likes.push(currentUser.id);
+  render();
+}
+
+/* ============================================================
+ *  Reply
+ * ============================================================ */
+function openReply(cid) {
+  const holder = document.getElementById(`reply-composer-${cid}`);
+  const parent = comments.find(c => c.id === cid);
+  const parentAuthor = userById(parent.authorId);
+  if (holder.classList.contains("active")) { holder.classList.remove("active"); holder.innerHTML = ""; return; }
+
+  holder.innerHTML = `
+    <textarea id="reply-ta-${cid}" placeholder="回复 @${parentAuthor.name}..." maxlength="500"></textarea>
+    <div class="composer-image-preview" id="reply-img-preview-${cid}">
+      <img alt="附图" />
+      <button class="remove-img" onclick="removeReplyImage('${cid}')">✕</button>
+    </div>
+    <div class="composer-footer">
+      <div class="composer-tools">
+        <button class="tool-btn at" onmousedown="event.preventDefault()" onclick="insertReplyAt('${cid}')">@</button>
+        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="pickReplyImage('${cid}')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+            <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
+            <circle cx="5.5" cy="6" r="1"/>
+            <path d="M1.5 11 L5 8 L8 11 L11 7.5 L14.5 11.5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="composer-right">
+        <span class="char-counter" id="reply-counter-${cid}">0 / 500</span>
+        <button class="btn-ghost" onclick="cancelReply('${cid}')">取消</button>
+        <button class="btn-primary" onclick="submitReply('${cid}')">发送</button>
+      </div>
+    </div>
+  `;
+  holder.classList.add("active");
+  const ta = document.getElementById(`reply-ta-${cid}`);
+  ta.addEventListener("input", () => {
+    const len = ta.value.length;
+    const ctr = document.getElementById(`reply-counter-${cid}`);
+    ctr.textContent = `${len} / 500`;
+    ctr.classList.toggle("over", len > 500);
+    maybeShowMentionPopup(ta);
+  });
+  ta.addEventListener("keyup", e => {
+    if (["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) maybeShowMentionPopup(ta);
+  });
+  ta.addEventListener("keydown", mentionKeydown);
+  ta.addEventListener("paste", e => {
+    for (const it of e.clipboardData.items) {
+      if (it.type.startsWith("image/")) {
+        handleFile(it.getAsFile(), "reply:" + cid);
+        e.preventDefault(); return;
+      }
+    }
+  });
+  ta.focus();
+}
+
+function pickReplyImage(cid) {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => handleFile(inp.files[0], "reply:" + cid);
+  inp.click();
+}
+function removeReplyImage(cid) {
+  delete replyImageMap[cid];
+  const prev = document.getElementById(`reply-img-preview-${cid}`);
+  if (prev) { prev.classList.remove("has-img"); prev.querySelector("img").src = ""; }
+}
+function insertReplyAt(cid) {
+  const ta = document.getElementById(`reply-ta-${cid}`);
+  ta.focus();
+  const p = ta.selectionStart;
+  ta.value = ta.value.slice(0, p) + "@" + ta.value.slice(p);
+  ta.selectionStart = ta.selectionEnd = p + 1;
+  maybeShowMentionPopup(ta);
+  ta.dispatchEvent(new Event("input"));
+}
+function cancelReply(cid) {
+  const holder = document.getElementById(`reply-composer-${cid}`);
+  holder.classList.remove("active");
+  holder.innerHTML = "";
+  delete replyImageMap[cid];
+}
+function submitReply(cid) {
+  const ta = document.getElementById(`reply-ta-${cid}`);
+  const content = ta.value.trim();
+  const img = replyImageMap[cid] || null;
+  if (!content && !img) return;
+  if (content.length > 500) { showToast("超过 500 字"); return; }
+  const parent = comments.find(c => c.id === cid);
+  parent.replies.push({
+    id: "r" + Date.now(),
+    authorId: currentUser.id, replyTo: parent.authorId,
+    content, time: nowStr(), editedAt: null, image: img, likes: []
+  });
+  /* 通知：被回复者 + @ 到的其他人，合并去重 */
+  const notified = new Set();
+  if (parent.authorId !== currentUser.id) notified.add(userById(parent.authorId).name);
+  extractMentions(content).forEach(u => notified.add(u.name));
+  if (notified.size > 0) showToast(`已通知 ${[...notified].map(n => "@" + n).join("、")}`);
+  delete replyImageMap[cid];
+  cancelReply(cid);
+  render();
+}
+
+function expandReplies(cid) { expandedReplies.add(cid); render(); }
+function collapseReplies(cid) { expandedReplies.delete(cid); render(); }
+
+/* ============================================================
+ *  Edit
+ * ============================================================ */
+function startEditMain(cid) {
+  const c = comments.find(x => x.id === cid);
+  _renderEditBox(cid, c.content, c.image, () => saveEditMain(cid));
+}
+function startEditReply(pid, rid) {
+  const parent = comments.find(x => x.id === pid);
+  const r = parent.replies.find(x => x.id === rid);
+  _renderEditBox(rid, r.content, r.image, () => saveEditReply(pid, rid));
+}
+function _renderEditBox(id, content, image, onSave) {
+  const box = document.getElementById(`edit-inline-${id}`);
+  editImageMap[id] = image || null;
+  box.innerHTML = `
+    <textarea id="edit-ta-${id}" maxlength="500">${content.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</textarea>
+    <div class="composer-image-preview ${image ? "has-img" : ""}" id="edit-img-preview-${id}">
+      <img alt="附图" src="${image || ""}" />
+      <button class="remove-img" onclick="removeEditImage('${id}')">✕</button>
+    </div>
+    <div class="composer-footer">
+      <div class="composer-tools">
+        <button class="tool-btn at" onmousedown="event.preventDefault()" onclick="insertEditAt('${id}')">@</button>
+        <button class="tool-btn" onmousedown="event.preventDefault()" onclick="pickEditImage('${id}')">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+            <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
+            <circle cx="5.5" cy="6" r="1"/>
+            <path d="M1.5 11 L5 8 L8 11 L11 7.5 L14.5 11.5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="composer-right">
+        <span class="char-counter" id="edit-counter-${id}">${content.length} / 500</span>
+        <button class="btn-ghost" onclick="cancelEdit('${id}')">取消</button>
+        <button class="btn-primary" id="edit-save-${id}">保存</button>
+      </div>
+    </div>
+  `;
+  box.classList.add("active");
+  document.getElementById(`edit-save-${id}`).onclick = onSave;
+  const ta = document.getElementById(`edit-ta-${id}`);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = ta.value.length;
+  ta.addEventListener("input", () => {
+    const len = ta.value.length;
+    const ctr = document.getElementById(`edit-counter-${id}`);
+    if (ctr) { ctr.textContent = `${len} / 500`; ctr.classList.toggle("over", len > 500); }
+    maybeShowMentionPopup(ta);
+  });
+  ta.addEventListener("keyup", e => {
+    if (["ArrowLeft","ArrowRight","Home","End"].includes(e.key)) maybeShowMentionPopup(ta);
+  });
+  ta.addEventListener("keydown", mentionKeydown);
+  ta.addEventListener("paste", e => {
+    for (const it of e.clipboardData.items) {
+      if (it.type.startsWith("image/")) {
+        handleFile(it.getAsFile(), "edit:" + id);
+        e.preventDefault(); return;
+      }
+    }
+  });
+}
+function insertEditAt(id) {
+  const ta = document.getElementById(`edit-ta-${id}`);
+  ta.focus();
+  const p = ta.selectionStart;
+  ta.value = ta.value.slice(0, p) + "@" + ta.value.slice(p);
+  ta.selectionStart = ta.selectionEnd = p + 1;
+  maybeShowMentionPopup(ta);
+  ta.dispatchEvent(new Event("input"));
+}
+function pickEditImage(id) {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => handleFile(inp.files[0], "edit:" + id);
+  inp.click();
+}
+function removeEditImage(id) {
+  editImageMap[id] = null;
+  const prev = document.getElementById(`edit-img-preview-${id}`);
+  if (prev) { prev.classList.remove("has-img"); prev.querySelector("img").src = ""; }
+}
+function cancelEdit(id) {
+  const box = document.getElementById(`edit-inline-${id}`);
+  if (box) { box.classList.remove("active"); box.innerHTML = ""; }
+  delete editImageMap[id];
+}
+function saveEditMain(cid) {
+  const ta = document.getElementById(`edit-ta-${cid}`);
+  const newContent = ta.value.trim();
+  const c = comments.find(x => x.id === cid);
+  if (!newContent && !editImageMap[cid]) { showToast("内容不能为空"); return; }
+  if (newContent.length > 500) { showToast("超过 500 字"); return; }
+  const newImage = editImageMap[cid] || null;
+  if (newContent !== c.content || newImage !== c.image) {
+    c.content = newContent;
+    c.image = newImage;
+    c.editedAt = nowStr();  /* 保留原发布时间 c.time，editedAt 单独记录 */
+  }
+  cancelEdit(cid); render();
+}
+function saveEditReply(pid, rid) {
+  const parent = comments.find(x => x.id === pid);
+  const r = parent.replies.find(x => x.id === rid);
+  const ta = document.getElementById(`edit-ta-${rid}`);
+  const newContent = ta.value.trim();
+  if (!newContent && !editImageMap[rid]) { showToast("内容不能为空"); return; }
+  if (newContent.length > 500) { showToast("超过 500 字"); return; }
+  const newImage = editImageMap[rid] || null;
+  if (newContent !== r.content || newImage !== r.image) {
+    r.content = newContent;
+    r.image = newImage;
+    r.editedAt = nowStr();
+  }
+  cancelEdit(rid); render();
+}
+
+/* ============================================================
+ *  Delete
+ * ============================================================ */
+function confirmDeleteMain(cid) {
+  openConfirm("确认删除这条评论？", "删除后会显示「此评论已删除 · 作者自删」占位，不可恢复。",
+    () => { const c = comments.find(x => x.id === cid); c.deleted = true; render(); });
+}
+function confirmDeleteReply(pid, rid) {
+  openConfirm("确认删除这条回复？", "删除后会显示「此评论已删除 · 作者自删」占位，不可恢复。",
+    () => {
+      const p = comments.find(x => x.id === pid);
+      const r = p.replies.find(x => x.id === rid);
+      r.deleted = true; render();
+    });
+}
+
+function openConfirm(title, msg, onOk) {
+  document.getElementById("confirm-title").textContent = title;
+  document.getElementById("confirm-msg").textContent = msg;
+  confirmAction = onOk;
+  document.getElementById("confirm-backdrop").classList.add("active");
+}
+function closeConfirm() {
+  document.getElementById("confirm-backdrop").classList.remove("active");
+  confirmAction = null;
+}
+document.getElementById("confirm-ok").addEventListener("click", () => {
+  if (confirmAction) confirmAction();
+  closeConfirm();
+});
+document.getElementById("confirm-backdrop").addEventListener("click", e => {
+  if (e.target.id === "confirm-backdrop") closeConfirm();
+});
+
+/* ============================================================
+ *  Toast
+ * ============================================================ */
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.getElementById("toast-container").appendChild(t);
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => {
+    t.classList.remove("show");
+    setTimeout(() => t.remove(), 300);
+  }, 2400);
+}
+
+/* ============================================================
+ *  Init
+ * ============================================================ */
+render();
+updateCounter();
+
+document.addEventListener("mousedown", e => {
+  if (popup.contains(e.target)) return;
+  if (e.target.tagName === "TEXTAREA") return;
+  hideMentionPopup();
+});
+</script>
+
+</body>
+</html>
