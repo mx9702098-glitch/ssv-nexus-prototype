@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>SSV Nexus · Skills</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-muted: #f7f7f8;
+    --text: #1a1a1a;
+    --text-muted: #6b6b73;
+    --text-faint: #9a9aa3;
+    --border: #e8e8ec;
+    --primary: #2f5fff;
+    --primary-soft: #eef2ff;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* ============ Top bar ============ */
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    background: #fff;
+  }
+  .logo {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .brand { font-weight: 600; font-size: 16px; }
+  .tagline { color: var(--text-muted); font-size: 13px; }
+  .topbar .spacer { flex: 1; }
+  .bell { color: var(--text-muted); font-size: 18px; }
+  .hi { color: var(--text-muted); font-size: 13px; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffd1dc, #ffb3c1);
+    display: inline-block;
+  }
+
+  /* ============ Layout ============ */
+  .layout { display: flex; min-height: calc(100vh - 56px); }
+  .sidebar {
+    width: 220px;
+    border-right: 1px solid var(--border);
+    padding: 24px 12px;
+    background: #fff;
+  }
+  .nav-group { margin-bottom: 20px; }
+  .nav-title {
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    padding: 0 12px 8px;
+    font-weight: 600;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+  .nav-item:hover { background: var(--bg-muted); }
+  .nav-item.active {
+    background: #1a1a1a;
+    color: #fff;
+  }
+  .nav-item .ico { width: 16px; display: inline-flex; justify-content: center; }
+
+  /* ============ Main ============ */
+  .main {
+    flex: 1;
+    padding: 28px 40px;
+    background: #fafafa;
+  }
+  .page-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .page-sub { color: var(--text-muted); font-size: 13px; margin: 0; }
+  .head-actions { display: flex; gap: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid transparent;
+    transition: background 0.15s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #1f4ae0; }
+  .btn-ghost {
+    background: #fff; border-color: var(--border); color: var(--text);
+  }
+  .btn-ghost:hover { background: var(--bg-muted); }
+
+  /* ============ Cards grid ============ */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    max-width: 1100px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .card-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; margin-bottom: 12px;
+  }
+  .card-head-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .card-title { font-size: 16px; font-weight: 600; margin: 0; }
+  .card-subtitle {
+    font-size: 12px; color: var(--text-faint);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ===== Tag pills ===== */
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tag-deploy    { background: #eef2ff; color: #3d54d4; }
+  .tag-prototype { background: #fff1e6; color: #b5541f; }
+  .tag-design    { background: #fde8f2; color: #a8326f; }
+  .tag-coding    { background: #e6f4ea; color: #2a7a45; }
+  .tag-data      { background: #e8f1fb; color: #1f5fad; }
+  .tag-meeting   { background: #f1ecff; color: #5a3fa9; }
+
+  .value-line {
+    font-size: 14px; color: var(--text);
+    margin: 4px 0 10px; line-height: 1.6;
+  }
+
+  .field-line {
+    font-size: 13px; color: var(--text-muted);
+    margin: 0 0 6px; line-height: 1.6;
+  }
+  .field-line:last-of-type { margin-bottom: 14px; }
+  .field-line .field-label {
+    color: var(--text-faint); font-size: 12px;
+    margin-right: 4px;
+  }
+
+  .meta {
+    color: var(--text-faint); font-size: 12px;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px; margin-top: auto;
+  }
+
+  .card-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px;
+  }
+  .card-actions .left { display: flex; gap: 8px; }
+  .card-actions .right { display: flex; gap: 8px; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ============ Knot entry card (v3: dashed explorer style) ============ */
+  .knot-card {
+    background: #fff;
+    border: 1.5px dashed #d4d4dc;
+    border-radius: 12px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-decoration: none;
+    color: inherit;
+    min-height: 100%;
+    gap: 12px;
+  }
+  .knot-card:hover {
+    border-color: var(--primary);
+    background: #fafbff;
+    transform: translateY(-2px);
+  }
+  .knot-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .knot-card:hover .knot-icon {
+    transform: scale(1.08) rotate(-8deg);
+    border-color: var(--primary);
+  }
+  .knot-title-v3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+  .knot-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .knot-cta {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 500;
+    margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  /* ============ Floating helpers ============ */
+  .float-bubbles {
+    position: fixed; right: 16px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .bubble {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: pointer;
+  }
+
+  /* ============ Modal ============ */
+  .modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .modal-mask.show { display: flex; }
+  .modal {
+    background: #fff;
+    width: 520px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
+  .modal-close {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent;
+    color: var(--text-faint);
+    font-size: 18px; cursor: pointer; border-radius: 6px;
+  }
+  .modal-close:hover { background: var(--bg-muted); color: var(--text); }
+
+  .form-item { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 13px; font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .form-label .req { color: #e0524f; margin-left: 2px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(47,95,255,0.12);
+  }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-hint {
+    text-align: right; font-size: 11px; color: var(--text-faint);
+    margin-top: 4px;
+  }
+  .modal-foot {
+    display: flex; justify-content: flex-end; gap: 8px;
+    margin-top: 20px;
+  }
+
+  .form-section-title {
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 18px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-section-title:first-child { margin-top: 0; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-item { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- =================== Top bar =================== -->
+<div class="topbar">
+  <div class="logo">N</div>
+  <div class="brand">SSV Nexus</div>
+  <div class="tagline">透明即上下文，上下文即生产力</div>
+  <div class="spacer"></div>
+  <div class="bell">🔔</div>
+  <div class="hi">Hi, maixiao</div>
+  <div class="avatar"></div>
+</div>
+
+<!-- =================== Layout =================== -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="nav-group">
+      <div class="nav-title">TOPICS</div>
+      <div class="nav-item"><span class="ico">◉</span> ALL</div>
+      <div class="nav-item"><span class="ico">◎</span> MY</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">TOOLS</div>
+      <div class="nav-item active"><span class="ico">⚡</span> Skills</div>
+      <div class="nav-item"><span class="ico">🧩</span> 插件</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title">ADMIN</div>
+      <div class="nav-item"><span class="ico">💡</span> 定位</div>
+      <div class="nav-item"><span class="ico">📜</span> 宪章</div>
+      <div class="nav-item"><span class="ico">⚙️</span> 设置</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Skills</h1>
+        <p class="page-sub">把 SSV 的规范、数据和工作流沉淀为 AI 能力，让同事之间的好东西被复用。</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn btn-primary" id="btnNewSkill">+ 新建 Skill</button>
+      </div>
+    </div>
+
+    <!-- ============ Cards ============ -->
+    <div class="grid" id="skillsGrid">
+
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h3 class="card-title">一键部署上线</h3>
+            <span class="card-subtitle">ssv-aibuilder-deploy</span>
+          </div>
+          <span class="tag tag-deploy">部署</span>
+        </div>
+
+        <p class="value-line">
+          将 SSV 内部的服务器资源、域名体系和 iOA 审批流程，沉淀为一句话即可完成的部署能力。
+        </p>
+
+        <p class="field-line">
+          <span class="field-label">适用场景</span>
+          demo、活动页、内部工具想快速发出去验证，不用再走服务器和审批流程。
+        </p>
+        <p class="field-line">
+          <span class="field-label">适用角色</span>
+          产品、设计、研发
+        </p>
+
+        <div class="meta">
+          由 windealli 创建 · 2026-04-21
+        </div>
+
+        <div class="card-actions">
+          <div class="left">
+            <button class="btn btn-ghost btn-sm">打开 ↗</button>
+          </div>
+          <div class="right">
+            <button class="btn btn-ghost btn-sm">编辑</button>
+            <button class="btn btn-ghost btn-sm">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h3 class="card-title">会议纪要自动生成</h3>
+            <span class="card-subtitle">ssv-meeting-notes</span>
+          </div>
+          <span class="tag tag-meeting">会议</span>
+        </div>
+        <p class="value-line">将会议录音、分享纪要模板和 SSV 的人员关系，沉淀为一套自动生成的纪要与待办分发能力。</p>
+        <p class="field-line">
+          <span class="field-label">适用场景</span>
+          周会、评审、跨部门对齐，会后要发纪要但不想再听一遍录音。
+        </p>
+        <p class="field-line">
+          <span class="field-label">适用角色</span>
+          所有角色
+        </p>
+        <div class="meta">
+          由 maixiao 创建 · 2026-04-20
+        </div>
+        <div class="card-actions">
+          <div class="left">
+            <button class="btn btn-ghost btn-sm">打开 ↗</button>
+          </div>
+          <div class="right">
+            <button class="btn btn-ghost btn-sm">编辑</button>
+            <button class="btn btn-ghost btn-sm">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <h3 class="card-title">公益设计原型一键生成</h3>
+            <span class="card-subtitle">ssv-aibuilder-design</span>
+          </div>
+          <span class="tag tag-prototype">产品原型</span>
+        </div>
+        <p class="value-line">
+          将腾讯公益的设计规范、基础框架，以及答题、捐赠、一对一捐款、捐声、小红花来信等业务场景组件，沉淀为一套开箱即用的原型生成能力。
+        </p>
+        <p class="field-line">
+          <span class="field-label">适用场景</span>
+          月捐聚合页、捐赠流程、公益活动、小红花来信等页面的视觉与交互原型，评审/开发可直接用。
+        </p>
+        <p class="field-line">
+          <span class="field-label">适用角色</span>
+          产品、设计
+        </p>
+        <div class="meta">
+          由 tevenxu 创建 · 2026-04-21
+        </div>
+        <div class="card-actions">
+          <div class="left">
+            <button class="btn btn-ghost btn-sm">打开 ↗</button>
+          </div>
+          <div class="right">
+            <button class="btn btn-ghost btn-sm">编辑</button>
+            <button class="btn btn-ghost btn-sm">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Knot entry card v3 ============ -->
+      <a class="knot-card" href="https://knot.woa.com/skills" target="_blank">
+        <div class="knot-icon">🧭</div>
+        <h3 class="knot-title-v3">探索更多 Skills</h3>
+        <p class="knot-desc">Knot 上沉淀了司内各种 Skills 技能包。<br/>去逛逛，下载安装感兴趣的，让工作流更高效智能。</p>
+        <span class="knot-cta">前往 Knot <span>↗</span></span>
+      </a>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Floating bubbles -->
+<div class="float-bubbles">
+  <div class="bubble">⊞</div>
+  <div class="bubble">✨</div>
+</div>
+
+<!-- =================== New Skill Modal =================== -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h3 class="modal-title">新建 Skill</h3>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+
+    <form id="skillForm" autocomplete="off">
+
+      <div class="form-section-title">基础信息</div>
+
+      <div class="form-item">
+        <label class="form-label">名称 <span class="req">*</span></label>
+        <input class="form-input" name="name" placeholder="请输入 Skill 名称（≤128 字符）" maxlength="128" required />
+      </div>
+
+      <div class="form-row">
+        <div class="form-item">
+          <label class="form-label">分类 <span class="req">*</span></label>
+          <input class="form-input" name="category" placeholder="如「AI 工具」" maxlength="64" required />
+        </div>
+        <div class="form-item">
+          <label class="form-label">标签 <span class="req">*</span></label>
+          <select class="form-select" name="tag" required>
+            <option value="">请选择标签</option>
+            <option value="deploy">部署</option>
+            <option value="prototype">产品原型</option>
+            <option value="design">设计</option>
+            <option value="coding">Coding</option>
+            <option value="data">数据分析</option>
+            <option value="meeting">会议</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">使用说明</div>
+
+      <div class="form-item">
+        <label class="form-label">适用场景 <span class="req">*</span></label>
+        <textarea class="form-textarea" name="scene" placeholder="这个 Skill 主要解决什么场景下的问题？（会显示在卡片上）" maxlength="200" required></textarea>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label">适用角色 <span class="req">*</span></label>
+        <input class="form-input" name="role" placeholder="如「产品、设计、研发」或「所有角色」" maxlength="64" required />
+      </div>
+
+      <div class="form-section-title">部署与链接</div>
+
+      <div class="form-item">
+        <label class="form-label">归属部门 <span class="req">*</span></label>
+        <select class="form-select" name="dept" required>
+          <option value="">请选择一级部门</option>
+          <option>SSV</option>
+          <option>CSIG</option>
+          <option>PCG</option>
+          <option>IEG</option>
+          <option>WXG</option>
+          <option>TEG</option>
+        </select>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label">跳转链接 <span class="req">*</span></label>
+        <input class="form-input" name="link" type="url" placeholder="https://..." required />
+      </div>
+
+      <div class="form-item">
+        <label class="form-label">存储地址</label>
+        <input class="form-input" name="storage" placeholder="https://...（可选，COS Key 或完整 URL）" />
+      </div>
+
+      <div class="form-item">
+        <label class="form-label">描述</label>
+        <textarea class="form-textarea" name="desc" placeholder="简要描述能力 / 工具的用途（≤1000 字符）" maxlength="1000" id="descInput"></textarea>
+        <div class="form-hint"><span id="descCount">0</span>/1000</div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="modalCancel">取消</button>
+        <button type="submit" class="btn btn-primary">创建</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ============ Modal control ============
+  const mask = document.getElementById('modalMask');
+  const btnNew = document.getElementById('btnNewSkill');
+  const btnClose = document.getElementById('modalClose');
+  const btnCancel = document.getElementById('modalCancel');
+  const form = document.getElementById('skillForm');
+  const descInput = document.getElementById('descInput');
+  const descCount = document.getElementById('descCount');
+
+  function openModal() { mask.classList.add('show'); }
+  function closeModal() { mask.classList.remove('show'); form.reset(); descCount.textContent = '0'; }
+
+  btnNew.addEventListener('click', openModal);
+  btnClose.addEventListener('click', closeModal);
+  btnCancel.addEventListener('click', closeModal);
+  mask.addEventListener('click', (e) => { if (e.target === mask) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  descInput.addEventListener('input', () => {
+    descCount.textContent = descInput.value.length;
+  });
+
+  // ============ Submit -> render new card ============
+  const TAG_MAP = {
+    deploy:    { text: '部署',    cls: 'tag-deploy' },
+    prototype: { text: '产品原型', cls: 'tag-prototype' },
+    design:    { text: '设计',    cls: 'tag-design' },
+    coding:    { text: 'Coding',  cls: 'tag-coding' },
+    data:      { text: '数据分析', cls: 'tag-data' },
+    meeting:   { text: '会议',    cls: 'tag-meeting' },
+  };
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const data = Object.fromEntries(fd.entries());
+    const tag = TAG_MAP[data.tag] || { text: data.tag, cls: 'tag-coding' };
+    const today = new Date().toISOString().slice(0, 10);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="card-head-left">
+          <h3 class="card-title">${escapeHtml(data.name)}</h3>
+          <span class="card-subtitle">${escapeHtml(data.category)}</span>
+        </div>
+        <span class="tag ${tag.cls}">${tag.text}</span>
+      </div>
+      ${data.desc ? `<p class="value-line">${escapeHtml(data.desc)}</p>` : ''}
+      <p class="field-line">
+        <span class="field-label">适用场景</span>
+        ${escapeHtml(data.scene)}
+      </p>
+      <p class="field-line">
+        <span class="field-label">适用角色</span>
+        ${escapeHtml(data.role)}
+      </p>
+      <div class="meta">由 maixiao 创建 · ${today}</div>
+      <div class="card-actions">
+        <div class="left">
+          <button class="btn btn-ghost btn-sm" onclick="window.open('${encodeURI(data.link)}','_blank')">打开 ↗</button>
+        </div>
+        <div class="right">
+          <button class="btn btn-ghost btn-sm">编辑</button>
+          <button class="btn btn-ghost btn-sm" onclick="this.closest('.card').remove()">删除</button>
+        </div>
+      </div>
+    `;
+
+    // Insert before the knot-card (last explorer card)
+    const grid = document.getElementById('skillsGrid');
+    const knot = grid.querySelector('.knot-card');
+    grid.insertBefore(card, knot);
+    closeModal();
+  });
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+</script>
+
+</body>
+</html>
