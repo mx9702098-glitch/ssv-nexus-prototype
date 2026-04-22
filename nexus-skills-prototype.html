@@ -148,7 +148,7 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
-  /* ===== Tag pills ===== */
+  /* ===== Tag pills (统一配色) ===== */
   .tag {
     display: inline-flex; align-items: center;
     padding: 3px 9px;
@@ -158,13 +158,9 @@
     line-height: 1.4;
     white-space: nowrap;
     flex-shrink: 0;
+    background: #eef2ff;
+    color: #3d54d4;
   }
-  .tag-deploy    { background: #eef2ff; color: #3d54d4; }
-  .tag-prototype { background: #fff1e6; color: #b5541f; }
-  .tag-design    { background: #fde8f2; color: #a8326f; }
-  .tag-coding    { background: #e6f4ea; color: #2a7a45; }
-  .tag-data      { background: #e8f1fb; color: #1f5fad; }
-  .tag-meeting   { background: #f1ecff; color: #5a3fa9; }
 
   .value-line {
     font-size: 14px; color: var(--text);
@@ -409,18 +405,18 @@
             <h3 class="card-title">一键部署上线</h3>
             <span class="card-subtitle">ssv-aibuilder-deploy</span>
           </div>
-          <span class="tag tag-deploy">部署</span>
+          <span class="tag">部署</span>
         </div>
 
         <p class="value-line">
           将 SSV 内部的服务器资源、域名体系和 iOA 审批流程，沉淀为一句话即可完成的部署能力。
         </p>
 
-        <p class="field-line">
+        <p class="field-line scene-row">
           <span class="field-label">适用场景</span>
           demo、活动页、内部工具想快速发出去验证，不用再走服务器和审批流程。
         </p>
-        <p class="field-line">
+        <p class="field-line role-row">
           <span class="field-label">适用角色</span>
           产品、设计、研发
         </p>
@@ -447,14 +443,14 @@
             <h3 class="card-title">会议纪要自动生成</h3>
             <span class="card-subtitle">ssv-meeting-notes</span>
           </div>
-          <span class="tag tag-meeting">会议</span>
+          <span class="tag">会议</span>
         </div>
         <p class="value-line">将会议录音、分享纪要模板和 SSV 的人员关系，沉淀为一套自动生成的纪要与待办分发能力。</p>
-        <p class="field-line">
+        <p class="field-line scene-row">
           <span class="field-label">适用场景</span>
           周会、评审、跨部门对齐，会后要发纪要但不想再听一遍录音。
         </p>
-        <p class="field-line">
+        <p class="field-line role-row">
           <span class="field-label">适用角色</span>
           所有角色
         </p>
@@ -479,16 +475,16 @@
             <h3 class="card-title">公益设计原型一键生成</h3>
             <span class="card-subtitle">ssv-aibuilder-design</span>
           </div>
-          <span class="tag tag-prototype">产品原型</span>
+          <span class="tag">产品原型</span>
         </div>
         <p class="value-line">
           将腾讯公益的设计规范、基础框架，以及答题、捐赠、一对一捐款、捐声、小红花来信等业务场景组件，沉淀为一套开箱即用的原型生成能力。
         </p>
-        <p class="field-line">
+        <p class="field-line scene-row">
           <span class="field-label">适用场景</span>
           月捐聚合页、捐赠流程、公益活动、小红花来信等页面的视觉与交互原型，评审/开发可直接用。
         </p>
-        <p class="field-line">
+        <p class="field-line role-row">
           <span class="field-label">适用角色</span>
           产品、设计
         </p>
@@ -637,19 +633,19 @@
 
   // ============ Submit -> render new card ============
   const TAG_MAP = {
-    deploy:    { text: '部署',    cls: 'tag-deploy' },
-    prototype: { text: '产品原型', cls: 'tag-prototype' },
-    design:    { text: '设计',    cls: 'tag-design' },
-    coding:    { text: 'Coding',  cls: 'tag-coding' },
-    data:      { text: '数据分析', cls: 'tag-data' },
-    meeting:   { text: '会议',    cls: 'tag-meeting' },
+    deploy:    '部署',
+    prototype: '产品原型',
+    design:    '设计',
+    coding:    'Coding',
+    data:      '数据分析',
+    meeting:   '会议',
   };
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
-    const tag = TAG_MAP[data.tag] || { text: data.tag, cls: 'tag-coding' };
+    const tagText = TAG_MAP[data.tag] || data.tag;
     const today = new Date().toISOString().slice(0, 10);
 
     const card = document.createElement('div');
@@ -660,14 +656,14 @@
           <h3 class="card-title">${escapeHtml(data.name)}</h3>
           <span class="card-subtitle">${escapeHtml(data.category)}</span>
         </div>
-        <span class="tag ${tag.cls}">${tag.text}</span>
+        <span class="tag">${tagText}</span>
       </div>
       ${data.desc ? `<p class="value-line">${escapeHtml(data.desc)}</p>` : ''}
-      <p class="field-line">
+      <p class="field-line scene-row">
         <span class="field-label">适用场景</span>
         ${escapeHtml(data.scene)}
       </p>
-      <p class="field-line">
+      <p class="field-line role-row">
         <span class="field-label">适用角色</span>
         ${escapeHtml(data.role)}
       </p>
@@ -688,6 +684,7 @@
     const knot = grid.querySelector('.knot-card');
     grid.insertBefore(card, knot);
     closeModal();
+    alignRows();
   });
 
   function escapeHtml(str) {
@@ -695,6 +692,27 @@
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     })[c]);
   }
+
+  // ============ Align same-row heights across cards ============
+  // 让三张卡片的 "介绍(value-line) / 场景(scene-row) / 角色(role-row)" 分别跨卡对齐
+  function alignRows() {
+    const selectors = ['.value-line', '.scene-row', '.role-row'];
+    selectors.forEach((sel) => {
+      const nodes = document.querySelectorAll('#skillsGrid .card ' + sel);
+      // 先重置，避免多次调用时高度越撑越大
+      nodes.forEach((n) => { n.style.minHeight = ''; });
+      let max = 0;
+      nodes.forEach((n) => { max = Math.max(max, n.offsetHeight); });
+      nodes.forEach((n) => { n.style.minHeight = max + 'px'; });
+    });
+  }
+
+  window.addEventListener('load', alignRows);
+  window.addEventListener('resize', () => {
+    // 防抖
+    clearTimeout(window.__alignTimer);
+    window.__alignTimer = setTimeout(alignRows, 120);
+  });
 </script>
 
 </body>
