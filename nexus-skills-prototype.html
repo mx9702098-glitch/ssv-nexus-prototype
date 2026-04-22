@@ -540,13 +540,13 @@
 
       <div class="form-row">
         <div class="form-item">
-          <label class="form-label">分类 <span class="req">*</span></label>
-          <input class="form-input" name="category" placeholder="如「AI 工具」" maxlength="64" required />
+          <label class="form-label">Skill ID <span class="req">*</span></label>
+          <input class="form-input" name="skillId" placeholder="如 ssv-aibuilder-design" maxlength="64" pattern="[a-z0-9\-]+" required />
         </div>
         <div class="form-item">
-          <label class="form-label">标签 <span class="req">*</span></label>
+          <label class="form-label">标签分类 <span class="req">*</span></label>
           <select class="form-select" name="tag" required>
-            <option value="">请选择标签</option>
+            <option value="">请选择分类</option>
             <option value="deploy">部署</option>
             <option value="prototype">产品原型</option>
             <option value="design">设计</option>
@@ -654,7 +654,7 @@
       <div class="card-head">
         <div class="card-head-left">
           <h3 class="card-title">${escapeHtml(data.name)}</h3>
-          <span class="card-subtitle">${escapeHtml(data.category)}</span>
+          <span class="card-subtitle">${escapeHtml(data.skillId)}</span>
         </div>
         <span class="tag">${tagText}</span>
       </div>
