@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SSV Nexus · 评论区 @ 提及 交互演示</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: #f5f6f8;
+    color: #1f2328;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .topbar {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid #e6e8eb;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: relative;
+    z-index: 50;
+  }
+  .logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #1f2328; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; margin-right: 10px;
+  }
+  .brand { font-weight: 600; font-size: 15px; margin-right: 16px; }
+  .slogan { color: #6b7280; font-size: 12px; border-left: 1px solid #e6e8eb; padding-left: 12px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+  .bell {
+    position: relative; width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #f5f6f8; cursor: pointer; font-size: 18px;
+  }
+  .bell:hover { background:#eef2ff; }
+  .bell .dot {
+    position: absolute; top: 8px; right: 8px; width: 10px; height: 10px;
+    border-radius: 50%; background: #ef4444; border: 2px solid #f5f6f8;
+    display:none;
+  }
+  .bell.has-unread .dot { display:block; }
+  .me { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .me .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600;
+    background: #c7d2fe; color:#3730a3;
+  }
+
+  /* ---------- 布局 ---------- */
+  .layout { display: grid; grid-template-columns: 220px 1fr; height: calc(100vh - 56px); }
+  .sidebar { background: #fff; border-right: 1px solid #e6e8eb; padding: 18px 12px; overflow-y:auto; }
+  .sidebar h4 { font-size: 11px; color: #9ca3af; letter-spacing: 1px; padding: 8px 10px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    border-radius: 8px; color: #4b5563; cursor: pointer; font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: #f5f6f8; }
+  .nav-item.active { background: #1f2328; color: #fff; }
+
+  .main { overflow-y: auto; padding: 28px 36px; position: relative; }
+
+  /* ---------- 页面切换 ---------- */
+  .page { display: none; }
+  .page.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px);} to {opacity:1; transform:none;}}
+
+  /* ---------- 场景引导条 ---------- */
+  .guide {
+    background:#1f2328; color:#fff; border-radius:10px; padding:12px 16px;
+    font-size:13px; margin-bottom: 18px; display:flex; align-items:center; gap:12px;
+  }
+  .guide .step { background:#fff; color:#1f2328; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+  .guide .tip { color:#d1d5db; font-size:12px; margin-left:auto; }
+
+  /* ---------- Topic 列表 ---------- */
+  .topic-list { background:#fff; border:1px solid #e6e8eb; border-radius:12px; overflow:hidden; }
+  .topic-row {
+    padding: 16px 20px; border-bottom: 1px solid #f1f3f5;
+    display:flex; align-items:flex-start; gap:14px; cursor:pointer;
+    transition: background .15s;
+  }
+  .topic-row:last-child { border-bottom:0; }
+  .topic-row:hover { background:#f9fafb; }
+  .topic-row.highlight { background:#fffbeb; outline:2px solid #fde68a; outline-offset:-2px; }
+  .topic-emoji { font-size:22px; }
+  .topic-meta { flex:1; }
+  .topic-title { font-size:14.5px; font-weight:600; margin-bottom:4px; }
+  .topic-sub { font-size:12px; color:#6b7280; }
+  .topic-badges { display:flex; gap:6px; margin-top:8px; }
+  .topic-badges span {
+    background:#f5f6f8; color:#4b5563; font-size:11.5px; padding:2px 8px; border-radius:999px;
+  }
+  .topic-arrow { color:#9ca3af; align-self:center; }
+
+  /* ---------- Event 详情页 ---------- */
+  .breadcrumb { font-size:12.5px; color:#6b7280; margin-bottom:14px; }
+  .breadcrumb a { color:#6b7280; cursor:pointer; }
+  .breadcrumb a:hover { color:#1f2328; }
+
+  .event-card {
+    background: #fff; border: 1px solid #e6e8eb; border-radius: 12px;
+    padding: 22px 24px; margin-bottom: 16px;
+  }
+  .event-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .event-meta { font-size: 12px; color: #6b7280; margin-bottom: 14px; }
+  .event-body { font-size: 13.5px; color: #374151; line-height: 1.8; }
+
+  .reactions { display: flex; gap: 8px; margin: 16px 0 14px; }
+  .reaction {
+    background: #f5f6f8; border-radius: 999px; padding: 5px 12px;
+    font-size: 12.5px; cursor: pointer; user-select: none;
+  }
+  .reaction:hover { background: #eef2ff; }
+
+  .comment-title { font-size: 13px; font-weight: 600; color: #4b5563; margin: 10px 0 14px; display:flex; align-items:center; gap:6px; }
+  .comment-title .count { color:#9ca3af; font-weight:400; }
+
+  .comment { display: flex; gap: 10px; padding: 10px 0; border-radius: 6px; transition: background .3s; }
+  .comment.focused { background:#fffbeb; outline: 2px solid #fde68a; padding:10px; }
+  .avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px; font-weight:600; flex-shrink:0;
+  }
+  .comment-body { flex: 1; }
+  .comment-author { font-size: 13px; font-weight: 600; }
+  .comment-author .dept { color: #9ca3af; font-weight: 400; margin-left: 6px; font-size: 12px; }
+  .comment-text { margin: 2px 0 4px; font-size: 13.5px; }
+  .mention-tag {
+    color: #2563eb; background: #eff6ff;
+    padding: 0 4px; border-radius: 4px; font-weight: 500;
+    position: relative; cursor: default;
+  }
+  /* 范围外：同色系，但下划虚线暗示"此处有额外信息" */
+  .mention-tag.out-scope {
+    text-decoration: underline dotted;
+    text-decoration-color: #94a3b8;
+    text-underline-offset: 3px;
+  }
+  /* hover 气泡 */
+  .mention-tag.out-scope:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: #1f2328; color: #fff;
+    font-size: 12px; font-weight: 400; white-space: nowrap;
+    padding: 6px 10px; border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 50; pointer-events: none;
+  }
+  .mention-tag.out-scope:hover::before {
+    content: ""; position: absolute; bottom: calc(100% + 1px); left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #1f2328;
+    z-index: 50; pointer-events: none;
+  }
+  .comment-foot { font-size: 12px; color: #9ca3af; display:flex; gap:12px; margin-top:4px; }
+  .comment-foot a { color: #6b7280; cursor: pointer; }
+  .comment-foot a:hover { color: #1f2328; }
+
+  /* ---------- 回复输入框 ---------- */
+  .reply-box {
+    background: #f9fafb; border: 1px solid #e6e8eb; border-radius: 10px;
+    padding: 14px; margin-top: 12px;
+    position: relative;
+  }
+  .reply-input {
+    width: 100%; min-height: 72px; border: 1px solid #e6e8eb;
+    border-radius: 8px; padding: 10px 12px; font-size: 13.5px; resize: vertical;
+    font-family: inherit; background:#fff;
+    line-height: 1.7;
+  }
+  .reply-input:focus { outline: 2px solid #c7d2fe; border-color:#a5b4fc; }
+
+  .reply-foot {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:10px;
+  }
+  .reply-hint { font-size:12px; color:#9ca3af; }
+  .reply-hint kbd { background:#fff; border:1px solid #d1d5db; border-radius:4px; padding:0 5px; font-size:11px; font-family:monospace; }
+  .send-btn {
+    background: #1f2328; color: #fff; border: 0; padding: 8px 18px;
+    border-radius: 8px; font-size: 13px; cursor: pointer; font-weight:500;
+  }
+  .send-btn:hover { background:#000; }
+
+  /* ---------- @ 弹出菜单 ---------- */
+  .mention-menu {
+    position: absolute; background:#fff; border:1px solid #e6e8eb;
+    border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    width: 320px; overflow:hidden; z-index: 80;
+    display: none;
+  }
+  .mention-menu.show { display:block; animation: fade .15s ease; }
+  .mention-menu .header {
+    padding: 8px 12px; font-size: 11.5px; color:#6b7280; background:#f9fafb;
+    border-bottom:1px solid #e6e8eb; display:flex; align-items:center; gap:6px;
+  }
+  .mention-item {
+    padding: 10px 12px; display:flex; align-items:center; gap:10px;
+    cursor:pointer; border-bottom: 1px solid #f1f3f5;
+  }
+  .mention-item:last-child { border-bottom:0; }
+  .mention-item:hover, .mention-item.hover { background:#f5f6f8; }
+  .mention-item .avatar-sm { width: 30px; height:30px; font-size:11px; }
+  .mention-info { flex:1; }
+  .mention-name { font-size: 13.5px; font-weight: 500; }
+  .mention-name .sub { color:#9ca3af; font-size:12px; font-weight:400; margin-left:6px; }
+  .scope-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500;
+  }
+  .scope-tag.in { background:#ecfdf5; color:#059669; }
+  .scope-tag.out { background:#fff7ed; color:#c2410c; }
+
+  /* 评论者侧轻提示已移除 —— 身份差异前置到 @ 下拉项与 @ 标签虚线暗示里 */
+
+  /* ---------- 弹窗通知 (右上角 toast 式) ---------- */
+  .notif-pop {
+    position: fixed; top: 72px; right: 20px; width: 360px;
+    background:#fff; border:1px solid #e6e8eb; border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.15);
+    padding: 14px 16px; z-index: 200;
+    transform: translateX(420px); opacity: 0;
+    transition: transform .35s cubic-bezier(.2,.9,.3,1.2), opacity .25s;
+  }
+  .notif-pop.show { transform: translateX(0); opacity: 1; }
+  .notif-pop .np-head {
+    display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    font-size:12.5px; color:#6b7280;
+  }
+  .notif-pop .np-head strong { color:#1f2328; }
+  .notif-pop .np-head .close {
+    margin-left:auto; cursor:pointer; color:#9ca3af; font-size: 18px; line-height: 1;
+  }
+  .notif-pop .np-body { font-size: 13.5px; color:#374151; line-height: 1.65; }
+  .notif-pop .np-body .preview {
+    color:#6b7280; font-size:12.5px; background:#f9fafb;
+    border-left:3px solid #d1d5db; padding:6px 10px; margin-top:8px; border-radius:4px;
+  }
+  .notif-pop .np-cta { margin-top: 10px; display:flex; gap:6px; }
+  .notif-pop button {
+    font-size: 12.5px; padding: 6px 12px; border-radius: 6px; cursor: pointer; border:0;
+    font-weight: 500;
+  }
+  .btn-primary { background:#1f2328; color:#fff; }
+  .btn-primary:hover { background:#000; }
+  .btn-ghost { background:#fff; color:#4b5563; border:1px solid #d1d5db !important; }
+  .btn-ghost:hover { background:#f5f6f8; }
+
+  /* ---------- 通知中心页 ---------- */
+  .notif-list { background:#fff; border:1px solid #e6e8eb; border-radius: 12px; overflow:hidden; }
+  .notif-row {
+    padding: 16px 20px; border-bottom: 1px solid #f1f3f5; cursor: pointer;
+    display:flex; gap:12px;
+  }
+  .notif-row:last-child { border-bottom:0; }
+  .notif-row:hover { background:#f9fafb; }
+  .notif-row.unread { background:#fefce8; }
+  .notif-row.unread:hover { background:#fef9c3; }
+  .notif-icon {
+    width:36px; height:36px; border-radius:50%;
+    display:flex;align-items:center;justify-content:center; flex-shrink:0; font-size:16px;
+  }
+  .notif-icon.blue { background:#dbeafe; color:#1d4ed8; }
+  .notif-icon.orange { background:#ffedd5; color:#c2410c; }
+  .notif-icon.green { background:#d1fae5; color:#047857; }
+  .notif-content { flex:1; }
+  .notif-main { font-size: 13.5px; line-height:1.6; color:#1f2328; }
+  .notif-preview { color:#6b7280; font-size:12.5px; margin-top:4px; }
+  .notif-time { color:#9ca3af; font-size:11.5px; margin-top:6px; }
+
+  /* 旧弹窗样式已移除，审批统一走企微 Bot 手机卡片 */
+
+  /* ---------- 底部小 toast ---------- */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    background: #1f2328; color: #fff; padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; z-index: 999; opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 无人时的占位 */
+  .empty { color:#9ca3af; font-size:13px; padding: 60px 20px; text-align:center; border:1px dashed #e6e8eb; border-radius:12px; }
+
+  /* ---------- 企微手机模拟 ---------- */
+  .wecom-phone {
+    position: fixed; right: 28px; bottom: 28px; z-index: 250;
+    display: none;
+    animation: phoneIn .4s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .wecom-phone.show { display: block; }
+  @keyframes phoneIn {
+    from { opacity: 0; transform: translateY(40px) scale(.92); }
+    to   { opacity: 1; transform: none; }
+  }
+  .wp-frame {
+    width: 320px; height: 600px; background: #ebebeb;
+    border-radius: 38px; padding: 10px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.35), 0 0 0 6px #1f2328, 0 0 0 7px #000;
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .wp-notch {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 26px; background: #1f2328; border-radius: 0 0 16px 16px; z-index: 2;
+  }
+  .wp-status {
+    padding: 6px 22px 4px; font-size: 10px; color: #6b7280;
+    display: flex; justify-content: space-between; margin-top: 14px;
+  }
+  .wp-titlebar {
+    background: #ededed; padding: 10px 14px;
+    display:flex; align-items:center; justify-content: space-between;
+    border-bottom: 0.5px solid #d1d5db;
+    font-size: 15px; font-weight: 500;
+  }
+  .wp-back { color:#2563eb; font-size: 22px; line-height: 1; }
+  .wp-more { color:#6b7280; font-size: 16px; }
+  .wp-body {
+    flex: 1; padding: 14px 12px; background: #ededed;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+  }
+  .wp-inputbar {
+    background: #f7f7f7; border-top: 0.5px solid #d1d5db;
+    padding: 8px 12px;
+  }
+  .wp-input {
+    background: #fff; border-radius: 8px; padding: 8px 12px;
+    font-size: 12px; color: #9ca3af;
+  }
+  .wp-hint {
+    margin-top: 8px; text-align: center; font-size: 11px; color: #6b7280;
+  }
+
+  /* Bot 头像 + 时间 */
+  .wp-msg { display: flex; gap: 8px; animation: msgIn .3s ease; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none;}}
+  .wp-bot-avatar {
+    width: 36px; height: 36px; border-radius: 8px; background: #1f2328; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink: 0;
+    font-size: 14px;
+  }
+  .wp-msg-body { flex: 1; }
+  .wp-msg-sender { font-size: 11px; color:#6b7280; margin-bottom: 4px; }
+  .wp-card {
+    background:#fff; border-radius: 8px; padding: 14px 14px 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .wp-card-title { font-size: 14px; font-weight: 600; line-height: 1.5; color: #1f2328; }
+  .wp-card-title .link { color:#2563eb; text-decoration: none; }
+  .wp-card-sub { font-size: 11.5px; color:#6b7280; margin-top: 6px; line-height: 1.5; }
+  .wp-card-preview {
+    font-size: 12px; color: #4b5563; margin-top: 8px;
+    padding: 8px 10px; background:#f9fafb; border-radius: 6px;
+    border-left: 3px solid #d1d5db;
+  }
+  .wp-card-footer {
+    margin-top: 12px; padding-top: 10px; border-top: 0.5px solid #f1f3f5;
+    display: flex; gap: 0;
+  }
+  .wp-card-btn {
+    flex: 1; text-align: center; padding: 8px 0;
+    font-size: 13.5px; color: #2563eb; cursor: pointer;
+    background: transparent; border: 0; font-weight: 500;
+  }
+  .wp-card-btn:hover { background: #f5f6f8; }
+  .wp-card-btn.reject { color: #6b7280; }
+  .wp-card-btn + .wp-card-btn { border-left: 0.5px solid #f1f3f5; }
+  .wp-card-footer.resolved {
+    justify-content: center; color: #9ca3af; font-size: 12px;
+    padding: 10px 0 4px; border-top: 0.5px solid #f1f3f5;
+  }
+  .wp-card-footer.resolved .tag-pass { color:#059669; font-weight:500; }
+  .wp-card-footer.resolved .tag-reject { color:#6b7280; }
+
+  /* 手机右上角关闭按钮 */
+  .wp-close {
+    position: absolute; top: -10px; right: -10px; width: 28px; height: 28px;
+    background: #fff; border-radius: 50%; color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2); cursor: pointer;
+    font-size: 16px; z-index: 10;
+  }
+  .wp-close:hover { background: #f5f6f8; color: #1f2328; }
+
+  /* 范围外被 @ 者通知卡片 · 申请按钮的置灰态 */
+  .apply-btn-inline {
+    display: inline-block; margin-top: 10px;
+    background:#2563eb; color:#fff; border:0; padding: 7px 14px;
+    border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500;
+  }
+  .apply-btn-inline:hover { background:#1d4ed8; }
+  .apply-btn-inline.applied {
+    background:#f3f4f6; color:#6b7280; cursor: default;
+  }
+</style>
+</head>
+<body>
+
+<!-- ---------- 顶栏 ---------- -->
+<div class="topbar">
+  <div class="logo">N</div>
+  <div class="brand">SSV Nexus</div>
+  <div class="slogan">透明即上下文，上下文即生产力</div>
+  <div class="topbar-right">
+    <div class="bell" id="bell" onclick="openNotifCenter()">🔔<span class="dot"></span></div>
+    <div class="me"><div class="avatar" id="meAvatar">S</div><span id="meName">Suri</span></div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- 左侧导航 -->
+  <aside class="sidebar">
+    <h4>TOPICS</h4>
+    <div class="nav-item active" onclick="goTopicList()">● ALL</div>
+    <div class="nav-item">◎ MY</div>
+    <h4 style="margin-top:14px;">TOOLS</h4>
+    <div class="nav-item">⚡ Skills</div>
+    <div class="nav-item">🧩 插件</div>
+    <h4 style="margin-top:14px;">ADMIN</h4>
+    <div class="nav-item">💡 定位</div>
+    <div class="nav-item">📜 宪章</div>
+    <div class="nav-item">⚙️ 设置</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ======= 页面 1：Topic 列表 ======= -->
+    <section class="page active" id="page-topicList">
+      <div class="guide">
+        <span class="step">1 / 4</span>
+        <span>你是 <strong>Suri</strong>（产品设计）。点下方 <strong>SSV Nexus 需求更新</strong> 进入讨论区，试试 @ 同事。</span>
+      </div>
+
+      <div class="topic-list">
+        <div class="topic-row highlight" onclick="goEvent()">
+          <div class="topic-emoji">📄</div>
+          <div class="topic-meta">
+            <div class="topic-title">SSV Nexus 需求更新</div>
+            <div class="topic-sub">maixiao(肖迈) · 为村发展实验室 · 最近更新 刚刚</div>
+            <div class="topic-badges"><span>1 事件</span><span>2 条评论</span><span>3 条待办</span></div>
+          </div>
+          <div class="topic-arrow">→</div>
+        </div>
+        <div class="topic-row">
+          <div class="topic-emoji">📊</div>
+          <div class="topic-meta">
+            <div class="topic-title">Q2 产品路线图</div>
+            <div class="topic-sub">李四 · 战略中心 · 2 天前</div>
+            <div class="topic-badges"><span>3 事件</span><span>5 条评论</span></div>
+          </div>
+          <div class="topic-arrow">→</div>
+        </div>
+        <div class="topic-row">
+          <div class="topic-emoji">🌱</div>
+          <div class="topic-meta">
+            <div class="topic-title">乡村振兴 · 试点复盘</div>
+            <div class="topic-sub">张三 · 为村发展实验室 · 4 天前</div>
+            <div class="topic-badges"><span>2 事件</span><span>8 条评论</span></div>
+          </div>
+          <div class="topic-arrow">→</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= 页面 2：Event 详情（评论区） ======= -->
+    <section class="page" id="page-event">
+      <div class="breadcrumb"><a onclick="goTopicList()">ALL</a> › <a onclick="goTopicList()">SSV Nexus 需求更新</a> › 测试222</div>
+
+      <div class="guide" id="guideEvent">
+        <span class="step">2 / 4</span>
+        <span>在回复框里输入 <kbd style="background:#fff;color:#1f2328;padding:1px 6px;border-radius:4px;">@</kbd>。默认成员无标签，<strong>范围外</strong>成员带 <code style="background:#fff;color:#c2410c;padding:1px 6px;border-radius:4px;font-size:11px;">需申请查看权限</code>。选一个试试。</span>
+        <span class="tip" id="scrollTip">↓ 滚动到底部</span>
+      </div>
+
+      <div class="event-card">
+        <h3>📄 测试222</h3>
+        <div class="event-meta">maixiao(肖迈) · 为村发展实验室 · 2026-04-21</div>
+        <div class="event-body">
+          核心交互逻辑（发布/评论/可见性）已更新落地。AI 总结的角色定位和文风准则已确立，分类提炼框架已就绪。本次新增评论区 @ 提及能力，请各位确认下方示例。
+        </div>
+
+        <div class="reactions">
+          <div class="reaction">👍 赞 1</div>
+          <div class="reaction">👎 踩</div>
+          <div class="reaction">🤔 疑惑</div>
+        </div>
+
+        <div class="comment-title">💬 评论 <span class="count" id="commentCount">2</span></div>
+
+        <div class="comment">
+          <div class="avatar-sm" style="background:#fde68a;color:#92400e;">肖</div>
+          <div class="comment-body">
+            <div class="comment-author">肖迈 <span class="dept">· 为村发展实验室</span></div>
+            <div class="comment-text">核心交互已更新。@张三 帮忙确认下字段定义。</div>
+            <div class="comment-foot"><span>10 分钟前</span><a>回复</a></div>
+          </div>
+        </div>
+        <div class="comment" id="cm-zhang">
+          <div class="avatar-sm" style="background:#bbf7d0;color:#065f46;">张</div>
+          <div class="comment-body">
+            <div class="comment-author">张三 <span class="dept">· 为村发展实验室</span></div>
+            <div class="comment-text">定义我看过了，没问题。唯一担心的是 @ 功能开放后，范围外的人能不能被 @ 到。</div>
+            <div class="comment-foot"><span>5 分钟前</span><a>回复</a></div>
+          </div>
+        </div>
+
+        <div id="newCommentSlot"></div>
+
+        <!-- 回复输入框 -->
+        <div class="reply-box">
+          <textarea id="replyInput" class="reply-input" placeholder="写下你的评论... 输入 @ 可提及同事"
+            oninput="handleInput(event)" onkeydown="handleKey(event)"></textarea>
+
+          <!-- @ 弹出菜单 -->
+          <div class="mention-menu" id="mentionMenu">
+            <div class="header">💡 选择要提及的同事 · <span style="color:#9ca3af;">标签提示范围外成员</span></div>
+            <div id="mentionItems"></div>
+          </div>
+
+          <div class="reply-foot">
+            <div class="reply-hint">提示：输入 <kbd>@</kbd> 提及同事</div>
+            <button class="send-btn" onclick="sendComment()">发送</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= 页面 3：通知中心 (被 @ 者视角) ======= -->
+    <section class="page" id="page-notif">
+      <div class="guide">
+        <span class="step">4 / 4</span>
+        <span>现在你是 <strong>李四</strong>。下面是你的通知中心，点这条"无权限" @ 通知看看会发生什么。</span>
+      </div>
+
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">🔔 通知中心</h2>
+
+      <div class="notif-list" id="notifList">
+        <div class="empty">暂无新通知</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ---------- 企微 Nexus Bot 消息卡片（模拟手机端） ---------- -->
+<div class="wecom-phone" id="wecomPhone">
+  <div class="wp-close" onclick="hideWecomPhone()" title="关闭手机">×</div>
+  <div class="wp-frame">
+    <div class="wp-notch"></div>
+    <div class="wp-status">
+      <span>14:32</span>
+      <span>●●●●● 5G ⬜</span>
+    </div>
+    <div class="wp-titlebar">
+      <span class="wp-back">‹</span>
+      <span class="wp-title">Nexus Bot</span>
+      <span class="wp-more">···</span>
+    </div>
+    <div class="wp-body" id="wpBody">
+      <!-- 消息卡片动态注入 -->
+    </div>
+    <div class="wp-inputbar">
+      <div class="wp-input">输入消息...</div>
+    </div>
+  </div>
+  <div class="wp-hint">📱 模拟企业微信 · Nexus Bot 会话</div>
+</div>
+
+<!-- 右上角弹出式通知 -->
+<div class="notif-pop" id="notifPop"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================
+   状态 + 模拟数据
+   ========================================================== */
+const MEMBERS = [
+  { name: '张三', dept: '为村发展实验室', avatarColor:'#bbf7d0', avatarText:'#065f46', letter:'张', inScope: true  },
+  { name: '王五', dept: '产品设计',         avatarColor:'#ddd6fe', avatarText:'#5b21b6', letter:'王', inScope: true  },
+  { name: '李四', dept: '战略中心',         avatarColor:'#fed7aa', avatarText:'#9a3412', letter:'李', inScope: false },
+  { name: '赵六', dept: '运营',            avatarColor:'#fecaca', avatarText:'#991b1b', letter:'赵', inScope: false },
+];
+
+let state = {
+  role: 'author',            // author / mentioned
+  pendingMentions: [],       // 评论中的被 @ 对象
+  sentComment: null,         // 评论者发出的评论
+};
+
+/* ==========================================================
+   页面切换
+   ========================================================== */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+}
+function goTopicList() { showPage('page-topicList'); setRole('author'); }
+function goEvent()     { showPage('page-event');     setRole('author'); }
+function goNotif()     { showPage('page-notif');     setRole('mentioned'); }
+
+/* 切换当前"用户"身份（顶栏头像/名字 + 铃铛状态） */
+function setRole(role) {
+  state.role = role;
+  const avatar = document.getElementById('meAvatar');
+  const name = document.getElementById('meName');
+  if (role === 'author') {
+    avatar.textContent = 'S'; avatar.style.background='#c7d2fe'; avatar.style.color='#3730a3';
+    name.textContent = 'Suri';
+  } else {
+    avatar.textContent = '李'; avatar.style.background='#fed7aa'; avatar.style.color='#9a3412';
+    name.textContent = '李四';
+  }
+}
+
+/* ==========================================================
+   评论输入：@ 触发下拉
+   ========================================================== */
+function handleInput(e) {
+  const val = e.target.value;
+  const cursor = e.target.selectionStart;
+  const before = val.slice(0, cursor);
+  // 最后一个 @ 之后到光标的文字
+  const lastAt = before.lastIndexOf('@');
+  if (lastAt >= 0 && !/\s/.test(before.slice(lastAt + 1))) {
+    const keyword = before.slice(lastAt + 1);
+    openMentionMenu(keyword);
+  } else {
+    closeMentionMenu();
+  }
+}
+function handleKey(e) {
+  if (e.key === 'Escape') closeMentionMenu();
+}
+
+function openMentionMenu(keyword) {
+  const menu = document.getElementById('mentionMenu');
+  const listEl = document.getElementById('mentionItems');
+  const filtered = MEMBERS.filter(m => !keyword || m.name.includes(keyword));
+  if (filtered.length === 0) { closeMentionMenu(); return; }
+  listEl.innerHTML = filtered.map((m, i) => `
+    <div class="mention-item" onclick="insertMention('${m.name}')">
+      <div class="avatar-sm" style="background:${m.avatarColor};color:${m.avatarText};">${m.letter}</div>
+      <div class="mention-info">
+        <div class="mention-name">${m.name} <span class="sub">· ${m.dept}</span></div>
+      </div>
+      ${m.inScope ? '' : '<span class="scope-tag out">不在可见范围，需申请</span>'}
+    </div>
+  `).join('');
+  menu.classList.add('show');
+  // 定位到 textarea 下方
+  const input = document.getElementById('replyInput');
+  menu.style.top = (input.offsetTop + input.offsetHeight + 6) + 'px';
+  menu.style.left = input.offsetLeft + 'px';
+}
+function closeMentionMenu() {
+  document.getElementById('mentionMenu').classList.remove('show');
+}
+
+function insertMention(name) {
+  const input = document.getElementById('replyInput');
+  const cursor = input.selectionStart;
+  const val = input.value;
+  const before = val.slice(0, cursor);
+  const after = val.slice(cursor);
+  const lastAt = before.lastIndexOf('@');
+  const newBefore = before.slice(0, lastAt) + '@' + name + ' ';
+  input.value = newBefore + after;
+  const pos = newBefore.length;
+  input.setSelectionRange(pos, pos);
+  input.focus();
+  closeMentionMenu();
+}
+
+/* ==========================================================
+   发送评论 → 自动切到被 @ 者视角 + 弹通知
+   ========================================================== */
+function sendComment() {
+  const input = document.getElementById('replyInput');
+  const text = input.value.trim();
+  if (!text) { toast('请先输入评论内容'); return; }
+
+  // 解析出评论中提到的成员
+  const mentions = MEMBERS.filter(m => text.includes('@' + m.name));
+
+  // 渲染文本（把 @xxx 高亮；范围外的用虚线下划线 + hover 气泡）
+  let html = text;
+  MEMBERS.forEach(m => {
+    const reg = new RegExp('@' + m.name, 'g');
+    if (m.inScope) {
+      html = html.replace(reg, `<span class="mention-tag">@${m.name}</span>`);
+    } else {
+      html = html.replace(reg,
+        `<span class="mention-tag out-scope" data-tip="${m.name} 不在此 Topic 可见范围内">@${m.name}</span>`);
+    }
+  });
+
+  // 插入到评论列表
+  const slot = document.getElementById('newCommentSlot');
+  const div = document.createElement('div');
+  div.className = 'comment';
+  div.id = 'cm-suri';
+  div.innerHTML = `
+    <div class="avatar-sm" style="background:#c7d2fe;color:#3730a3;">S</div>
+    <div class="comment-body">
+      <div class="comment-author">Suri <span class="dept">· 产品设计</span></div>
+      <div class="comment-text">${html}</div>
+      <div class="comment-foot"><span>刚刚</span><a>回复</a><a>删除</a></div>
+    </div>`;
+  slot.appendChild(div);
+  document.getElementById('commentCount').textContent =
+    parseInt(document.getElementById('commentCount').textContent) + 1;
+
+  // 记录发送内容，供后面的通知用
+  state.sentComment = text;
+  state.pendingMentions = mentions;
+
+  input.value = '';
+  closeMentionMenu();
+  toast('已发送');
+  if (mentions.length === 0) return;
+
+  // 1.2 秒后：切换到被 @ 者视角，弹通知
+  setTimeout(() => {
+    // 若 @ 了多个，优先演示"不在范围内"的那个
+    const target = mentions.find(m => !m.inScope) || mentions[0];
+    switchToMentionedAndNotify(target);
+  }, 1400);
+}
+
+/* ==========================================================
+   切换到被 @ 者 + 双通道通知（站内 @tab + 企微 Bot）
+   ========================================================== */
+function switchToMentionedAndNotify(target) {
+  setRole('mentioned');
+  document.getElementById('bell').classList.add('has-unread');
+
+  // 重建站内通知列表
+  const list = document.getElementById('notifList');
+  list.innerHTML = '';
+  const notifs = buildNotifsForTarget(target);
+  notifs.forEach(n => list.appendChild(renderNotifRow(n)));
+
+  // 右上角站内弹出提醒
+  showNotifPop(target);
+
+  // 同时：企微 Nexus Bot 推送一条 @ 提醒
+  showWecomMentionCard(target);
+}
+
+/* 企微 Bot 给被 @ 者推的第一条消息（与站内通知同步） */
+function showWecomMentionCard(target) {
+  showWecomPhone();
+  // 切身份为"李四（被 @ 者）"
+  const avatar = document.getElementById('meAvatar');
+  const nameEl = document.getElementById('meName');
+  avatar.textContent = '李'; avatar.style.background='#fed7aa'; avatar.style.color='#9a3412';
+  nameEl.textContent = '李四（被 @）';
+
+  const body = document.getElementById('wpBody');
+  if (target.inScope) {
+    // 情况 A · 范围内
+    body.innerHTML = `
+      <div class="wp-msg">
+        <div class="wp-bot-avatar">N</div>
+        <div class="wp-msg-body">
+          <div class="wp-msg-sender">Nexus Bot · 刚刚</div>
+          <div class="wp-card">
+            <div class="wp-card-title">
+              <strong>Suri</strong> 在
+              <a class="link" onclick="toast('跳转至 Event')">SSV Nexus 需求更新 · 测试222</a>
+              的评论中提到了你
+            </div>
+            <div class="wp-card-preview" style="margin-top:10px;font-size:12px;color:#4b5563;padding:8px 10px;background:#f9fafb;border-radius:6px;border-left:3px solid #d1d5db;">
+              ${escapeHtml(state.sentComment)}
+            </div>
+            <div class="wp-card-footer">
+              <button class="wp-card-btn" onclick="afterMentionInScope()">查看评论</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // 情况 B · 范围外
+    body.innerHTML = `
+      <div class="wp-msg" id="wpMentionMsg">
+        <div class="wp-bot-avatar">N</div>
+        <div class="wp-msg-body">
+          <div class="wp-msg-sender">Nexus Bot · 刚刚</div>
+          <div class="wp-card">
+            <div class="wp-card-title">
+              <strong>Suri</strong> 在一个你暂无查看权限的 Topic <strong>SSV Nexus 需求更新</strong> 中 @ 了你
+            </div>
+            <div class="wp-card-footer" id="wpApplyFooter">
+              <button class="wp-card-btn" onclick="applyFromWecom(this)">申请查看权限</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+/* 范围内 · 在企微里点【查看评论】 */
+function afterMentionInScope() {
+  hideWecomPhone();
+  handleNotifClick({ type: 'mention-in' });
+}
+
+/* 范围外 · 在企微里点【申请查看权限】 */
+function applyFromWecom(btn) {
+  // 企微侧卡片：按钮变已申请置灰态
+  const footer = document.getElementById('wpApplyFooter');
+  footer.className = 'wp-card-footer resolved';
+  footer.innerHTML = `<span style="color:#9ca3af;">已申请 · 等待 Topic 维护者审批</span>`;
+
+  // 同步站内通知中心那条按钮
+  syncApplyButtonState();
+
+  // 0.8 秒后 Bot 推审批卡片（给维护者）
+  setTimeout(() => appendWecomApprovalCard(), 800);
+}
+
+/* 两端【申请】按钮状态同步 */
+function syncApplyButtonState() {
+  const btn = document.querySelector('.apply-btn-inline');
+  if (btn && !btn.classList.contains('applied')) {
+    btn.classList.add('applied');
+    btn.textContent = '已申请 · 等待 Topic 维护者审批';
+    btn.disabled = true;
+  }
+}
+
+function buildNotifsForTarget(target) {
+  const arr = [];
+  if (target.inScope) {
+    arr.push({
+      type: 'mention-in',
+      icon:'💬', iconCls:'blue',
+      main: `<strong>Suri</strong> 在 <strong>SSV Nexus 需求更新 · 测试222</strong> 的评论中提到了你`,
+      preview: state.sentComment,
+      time: '刚刚', unread: true,
+    });
+  } else {
+    arr.push({
+      type: 'mention-out',
+      icon:'@', iconCls:'orange',
+      main: `<strong>Suri</strong> 在一个你暂无查看权限的 Topic <strong>SSV Nexus 需求更新</strong> 中 @ 了你`,
+      preview: null,
+      time: '刚刚', unread: true,
+      withApplyBtn: true,
+    });
+  }
+  // 补一条历史通知丰富一下
+  arr.push({
+    type: 'old', icon:'✅', iconCls:'green',
+    main: '<strong>王五</strong> 将待办 "交付物验收" 标记为已完成',
+    preview: 'Q2 产品路线图 · 里程碑 2',
+    time: '2 小时前', unread: false,
+  });
+  return arr;
+}
+
+function renderNotifRow(n) {
+  const div = document.createElement('div');
+  div.className = 'notif-row' + (n.unread ? ' unread' : '');
+  const previewHtml = n.preview ? `<div class="notif-preview">${n.preview}</div>` : '';
+  const applyBtnHtml = n.withApplyBtn
+    ? `<button class="apply-btn-inline" onclick="event.stopPropagation(); applyFromNotif(this)">申请查看权限</button>`
+    : '';
+  div.innerHTML = `
+    <div class="notif-icon ${n.iconCls}">${n.icon}</div>
+    <div class="notif-content">
+      <div class="notif-main">${n.main}</div>
+      ${previewHtml}
+      <div class="notif-time">${n.time}</div>
+      ${applyBtnHtml}
+    </div>
+  `;
+  div.onclick = () => handleNotifClick(n);
+  return div;
+}
+
+function handleNotifClick(n) {
+  if (n.type === 'mention-in' || n.type === 'granted') {
+    // 直接跳回 Event 页 + 高亮定位到评论
+    setRole('mentioned');
+    showPage('page-event');
+    setTimeout(() => {
+      const el = document.getElementById('cm-suri');
+      if (el) {
+        el.classList.add('focused');
+        el.scrollIntoView({ behavior:'smooth', block:'center' });
+        setTimeout(() => el.classList.remove('focused'), 2400);
+      }
+    }, 200);
+    document.getElementById('guideEvent').innerHTML = `
+      <span class="step">✓</span>
+      <span>已跳转至评论原文并定位到对应楼层。</span>
+      <span class="tip" onclick="goNotif()" style="cursor:pointer;text-decoration:underline;">← 返回通知中心</span>`;
+  }
+  // mention-out 类型不走这里，点击申请按钮触发 applyFromNotif
+}
+
+/* 被 @ 者在站内点【申请查看权限】—— 原地置灰 + toast，同时同步企微卡片状态 */
+function applyFromNotif(btn) {
+  btn.classList.add('applied');
+  btn.textContent = '已申请 · 等待 Topic 维护者审批';
+  btn.disabled = true;
+  syncWecomApplyFooter();
+  setTimeout(() => appendWecomApprovalCard(), 800);
+}
+
+/* 同步企微端：原卡片按钮置灰 */
+function syncWecomApplyFooter() {
+  const footer = document.getElementById('wpApplyFooter');
+  if (footer && !footer.classList.contains('resolved')) {
+    footer.className = 'wp-card-footer resolved';
+    footer.innerHTML = `<span style="color:#9ca3af;">已申请 · 等待 Topic 维护者审批</span>`;
+  }
+}
+
+/* ==========================================================
+   右上角弹出式提醒
+   ========================================================== */
+function showNotifPop(target) {
+  const pop = document.getElementById('notifPop');
+  if (target.inScope) {
+    pop.innerHTML = `
+      <div class="np-head">💬 <strong>Suri</strong> 提到了你 <span class="close" onclick="hideNotifPop()">×</span></div>
+      <div class="np-body">
+        在 <strong>SSV Nexus 需求更新 · 测试222</strong> 的评论中：
+        <div class="preview">${escapeHtml(state.sentComment)}</div>
+      </div>
+      <div class="np-cta">
+        <button class="btn-primary" onclick="hideNotifPop(); handleNotifClick({type:'mention-in'})">查看评论</button>
+      </div>`;
+  } else {
+    pop.innerHTML = `
+      <div class="np-head">@ 有人提到了你 <span class="close" onclick="hideNotifPop()">×</span></div>
+      <div class="np-body">
+        <strong>Suri</strong> 在一个你暂无查看权限的 Topic <strong>SSV Nexus 需求更新</strong> 中 @ 了你
+      </div>
+      <div class="np-cta">
+        <button class="btn-primary" onclick="hideNotifPop(); applyFromPop(this)">申请查看权限</button>
+      </div>`;
+  }
+  pop.classList.add('show');
+  showPage('page-notif');
+}
+
+/* 从右上角弹出通知直接点申请 —— 同时同步站内按钮 + 企微卡片状态 */
+function applyFromPop() {
+  syncApplyButtonState();
+  syncWecomApplyFooter();
+  setTimeout(() => appendWecomApprovalCard(), 800);
+}
+
+function hideNotifPop() {
+  document.getElementById('notifPop').classList.remove('show');
+}
+
+/* ==========================================================
+   通知中心入口（铃铛）
+   ========================================================== */
+function openNotifCenter() {
+  goNotif();
+  document.getElementById('bell').classList.remove('has-unread');
+}
+
+/* ==========================================================
+   企微 Nexus Bot · 手机端模拟
+   审批主通道：维护者在 Bot 会话里直接点通过/拒绝
+   结果通过同一 Bot 回流给申请人
+   ========================================================== */
+function showWecomPhone() {
+  document.getElementById('wecomPhone').classList.add('show');
+}
+function hideWecomPhone() {
+  document.getElementById('wecomPhone').classList.remove('show');
+  document.getElementById('wpBody').innerHTML = '';
+}
+
+/* 向维护者（肖迈）的企微 Bot 会话追加审批卡片
+   为了演示连贯，这里用同一手机浮层，加一个"视角切换"小提示 */
+function appendWecomApprovalCard() {
+  showWecomPhone();
+  const body = document.getElementById('wpBody');
+
+  // 追加"视角切换"分隔条
+  const divider = `
+    <div style="text-align:center;font-size:10px;color:#9ca3af;padding:6px 0;letter-spacing:1px;">
+      ─── 以下为 肖迈（Topic 维护者）收到的 Bot 推送 ───
+    </div>`;
+  // 追加维护者审批卡片
+  const card = `
+    <div class="wp-msg">
+      <div class="wp-bot-avatar">N</div>
+      <div class="wp-msg-body">
+        <div class="wp-msg-sender">Nexus Bot · 刚刚</div>
+        <div class="wp-card" id="approvalCard">
+          <div class="wp-card-title">
+            <strong>李四</strong> 申请加入 Topic
+            <a class="link" onclick="toast('跳转至 Topic 预览')">SSV Nexus 需求更新</a>
+          </div>
+          <div class="wp-card-sub">由 Suri 在评论区 @ 触发</div>
+          <div class="wp-card-footer" id="approvalFooter">
+            <button class="wp-card-btn reject" onclick="handleWecomApproval(false)">拒绝</button>
+            <button class="wp-card-btn" onclick="handleWecomApproval(true)">通过</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  body.insertAdjacentHTML('beforeend', divider + card);
+  body.scrollTop = body.scrollHeight;
+
+  // 顶栏身份切到维护者
+  const avatar = document.getElementById('meAvatar');
+  const name = document.getElementById('meName');
+  avatar.textContent = '肖'; avatar.style.background='#fde68a'; avatar.style.color='#92400e';
+  name.textContent = '肖迈（维护者）';
+}
+
+/* 维护者点审批：卡片原地更新状态，结果回流给申请人 */
+function handleWecomApproval(pass) {
+  const footer = document.getElementById('approvalFooter');
+  if (pass) {
+    footer.className = 'wp-card-footer resolved';
+    footer.innerHTML = `<span class="tag-pass">✓ 已通过</span>`;
+  } else {
+    footer.className = 'wp-card-footer resolved';
+    footer.innerHTML = `<span class="tag-reject">✕ 已拒绝</span>`;
+  }
+
+  // 1 秒后 Bot 把结果推给申请人（新增一条消息，视角切回李四）
+  setTimeout(() => {
+    // 顶栏身份切回李四（申请人）
+    const avatar = document.getElementById('meAvatar');
+    const nameEl = document.getElementById('meName');
+    avatar.textContent = '李'; avatar.style.background='#fed7aa'; avatar.style.color='#9a3412';
+    nameEl.textContent = '李四（被 @）';
+
+    const body = document.getElementById('wpBody');
+    const divider = `
+      <div style="text-align:center;font-size:10px;color:#9ca3af;padding:6px 0;letter-spacing:1px;">
+        ─── 以下为 李四 收到的 Bot 推送 ───
+      </div>`;
+    body.insertAdjacentHTML('beforeend', divider);
+
+    const resultHtml = pass ? `
+      <div class="wp-msg">
+        <div class="wp-bot-avatar">N</div>
+        <div class="wp-msg-body">
+          <div class="wp-msg-sender">Nexus Bot · 推送给 李四</div>
+          <div class="wp-card">
+            <div class="wp-card-title">
+              你已获得 Topic <strong>SSV Nexus 需求更新</strong> 的查看权限
+            </div>
+            <div class="wp-card-footer">
+              <button class="wp-card-btn" onclick="afterGranted()">查看 Suri @你的评论</button>
+            </div>
+          </div>
+        </div>
+      </div>` : `
+      <div class="wp-msg">
+        <div class="wp-bot-avatar">N</div>
+        <div class="wp-msg-body">
+          <div class="wp-msg-sender">Nexus Bot · 推送给 李四</div>
+          <div class="wp-card">
+            <div class="wp-card-title" style="font-size:13.5px;color:#6b7280;font-weight:400;">
+              肖迈 暂未通过你加入 Topic <strong style="color:#1f2328;">SSV Nexus 需求更新</strong> 的申请
+            </div>
+          </div>
+        </div>
+      </div>`;
+    body.insertAdjacentHTML('beforeend', resultHtml);
+    body.scrollTop = body.scrollHeight;
+
+    // 站内 @tab 同步
+    if (pass) {
+      setTimeout(() => {
+        setRole('mentioned');
+        const list = document.getElementById('notifList');
+        const row = renderNotifRow({
+          type: 'granted', icon:'🔓', iconCls:'green',
+          main: `你已获得 Topic <strong>SSV Nexus 需求更新</strong> 的查看权限 · 点击查看 Suri @你的评论`,
+          preview: null,
+          time: '刚刚', unread: true,
+        });
+        list.insertBefore(row, list.firstChild);
+        document.getElementById('bell').classList.add('has-unread');
+      }, 400);
+    }
+  }, 1000);
+}
+
+/* 获权后点击 —— 跳 Event 定位评论；李四已在范围内，所有 @李四 的虚线还原为标准态 */
+function afterGranted() {
+  hideWecomPhone();
+  // 把"李四"标记为已在范围内（持久到后续渲染）
+  const li = MEMBERS.find(m => m.name === '李四');
+  if (li) li.inScope = true;
+  // 升级评论区中已有的 @李四 标签：去掉虚线 + 去掉 hover 气泡
+  document.querySelectorAll('.mention-tag.out-scope').forEach(tag => {
+    if (tag.textContent.includes('@李四')) {
+      tag.classList.remove('out-scope');
+      tag.removeAttribute('data-tip');
+    }
+  });
+  handleNotifClick({ type: 'granted' });
+}
+
+/* ==========================================================
+   工具
+   ========================================================== */
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 点击空白关闭 @ 菜单
+document.addEventListener('click', e => {
+  if (!e.target.closest('.mention-menu') && e.target.id !== 'replyInput') closeMentionMenu();
+});
+</script>
+
+</body>
+</html>
